@@ -1,0 +1,9 @@
+# Preserve data artifacts and recorded source hashes on all OSes.
+* text=auto eol=lf
+data/** -text
+src/ips/** -text
+*.py text eol=lf
+*.ps1 text eol=lf
+*.png binary
+*.pdf binary
+*.docx binary
