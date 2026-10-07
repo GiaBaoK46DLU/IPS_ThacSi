@@ -1,0 +1,13 @@
+{
+  "relocation": "lesson_6_layout",
+  "split_membership_unchanged": true,
+  "index_hashes": {
+    "test_indices.csv": "59160813d41758ccb781e9cacca74cd36e9a72d0d5928e3c5f7cecf6b3a02fca",
+    "train_indices.csv": "58688e2fc5c723178834e59d919d4b91694c37512e7eea9244fcacdda6f45b88",
+    "validation_indices.csv": "0e2cf359afc089836dda98cff802bb35c886b1c53c132dbaa5c43526af425a58"
+  },
+  "raw_sha256": {
+    "trainingData.csv": "45ca0128bd12019c976bb4793e407c979c82995d7a5940ab7288620247905168",
+    "validationData.csv": "5f90c536648cd657b2c516d20c4e0968d4003279ea6bd5d5d5322d3f1e8905c0"
+  }
+}

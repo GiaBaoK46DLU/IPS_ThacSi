@@ -1,0 +1,24 @@
+flowchart TD
+    U["UCI: hai CSV gốc<br/>Kiểm tra schema và SHA-256"]
+    D["trainingData.csv<br/>19.937 mẫu phát triển"]
+    T["validationData.csv<br/>1.111 mẫu test cuối"]
+    G["Nhóm người–máy–điểm đo<br/>StratifiedGroupKFold: seed 2026, fold 0"]
+    A["Train nội bộ: 16.025 mẫu<br/>Fit tọa độ và học trọng số"]
+    V["Validation nội bộ: 3.912 mẫu<br/>Chọn cấu hình và checkpoint"]
+    P["Lưu indices, mapping, preprocessing<br/>Manifest và kiểm tra rò rỉ"]
+    E["Đánh giá test sau khi chốt mô hình<br/>Không dùng test để chọn cấu hình"]
+    U --> D
+    U --> T
+    D --> G
+    G --> A
+    G --> V
+    A --> P
+    V --> P
+    T --> P
+    P --> E
+    classDef training fill:#dcfce7,stroke:#15803d,color:#14532d
+    classDef validation fill:#fef3c7,stroke:#b45309,color:#78350f
+    classDef test fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    class A training
+    class V validation
+    class T,E test

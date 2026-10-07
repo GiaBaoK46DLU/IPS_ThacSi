@@ -1,0 +1,53 @@
+{
+  "rssi": {
+    "sentinel": 100,
+    "detected_range": [
+      -104,
+      0
+    ],
+    "z_detected": "(rssi+104)/104",
+    "z_undetected": 0,
+    "mask_detected": 1,
+    "mask_undetected": 0,
+    "ap_feature_order": [
+      "z",
+      "mask"
+    ],
+    "removed_aps": [],
+    "fit_required": false,
+    "all_undetected_policy": "retain"
+  },
+  "coordinates": {
+    "order": [
+      "LONGITUDE",
+      "LATITUDE"
+    ],
+    "center": [
+      -7463.915495586015,
+      4864870.4533671485
+    ],
+    "shared_scale": 99.11502300196764,
+    "variance_ddof": 0,
+    "transform": "(xy-center)/shared_scale",
+    "inverse": "normalized_xy*shared_scale+center",
+    "fit_split": "train",
+    "fit_source": "data/raw/ujiindoorloc/trainingData.csv",
+    "fit_rows": 16025,
+    "fit_indices_sha256": "58688e2fc5c723178834e59d919d4b91694c37512e7eea9244fcacdda6f45b88",
+    "crs_epsg": null,
+    "units": "dataset_metre_convention_not_verified_full_CRS"
+  },
+  "shapes_without_batch": {
+    "AP_features": [
+      520,
+      2
+    ],
+    "MLP_input": [
+      1040
+    ],
+    "Mixer_input": [
+      26,
+      40
+    ]
+  }
+}
