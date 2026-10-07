@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/Blealtan/efficient-kan",
+  "commit": "7b6ce1c87f18c8bc90c208f6b494042344216b11",
+  "files": {
+    "efficient_kan.py": {
+      "url": "https://raw.githubusercontent.com/Blealtan/efficient-kan/7b6ce1c87f18c8bc90c208f6b494042344216b11/src/efficient_kan/kan.py",
+      "sha256": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7"
+    },
+    "LICENSE.efficient-kan": {
+      "url": "https://raw.githubusercontent.com/Blealtan/efficient-kan/7b6ce1c87f18c8bc90c208f6b494042344216b11/LICENSE",
+      "sha256": "09c34a5fa51d62153d52c2870d0a4491a1d84b980000863a8b9d055adf7e45fc"
+    }
+  },
+  "modifications": "none; original bytes retained"
+}
