@@ -1,0 +1,55 @@
+{
+  "purpose": "timing_and_memory_calibration_not_quality_comparison",
+  "note": "Estimate from mean of epochs 2 and 3; includes training, validation, diagnostics and checkpoint writing. Excludes startup/data loading; early stopping may shorten full runs; only one calibration seed.",
+  "models": [
+    {
+      "model": "mlp",
+      "device_name": "NVIDIA GeForce RTX 4060 Ti",
+      "torch": "2.9.0+cu128",
+      "batch_size": 64,
+      "epoch_seconds_measured": [
+        2.486942000046838,
+        2.1365671000094153,
+        2.19423129997449
+      ],
+      "mean_epochs_2_3_seconds": 2.1653991999919526,
+      "estimated_100_epochs_seconds_per_seed": 216.53991999919526,
+      "estimated_100_epochs_seconds_three_seeds": 649.6197599975858,
+      "peak_allocated_mib": 67.98974609375,
+      "peak_reserved_mib": 70.0
+    },
+    {
+      "model": "mlp_mixer",
+      "device_name": "NVIDIA GeForce RTX 4060 Ti",
+      "torch": "2.9.0+cu128",
+      "batch_size": 64,
+      "epoch_seconds_measured": [
+        4.685196599981282,
+        4.2857412999728695,
+        4.558903100027237
+      ],
+      "mean_epochs_2_3_seconds": 4.422322200000053,
+      "estimated_100_epochs_seconds_per_seed": 442.2322200000053,
+      "estimated_100_epochs_seconds_three_seeds": 1326.696660000016,
+      "peak_allocated_mib": 76.9228515625,
+      "peak_reserved_mib": 100.0
+    },
+    {
+      "model": "kan_mixer",
+      "device_name": "NVIDIA GeForce RTX 4060 Ti",
+      "torch": "2.9.0+cu128",
+      "batch_size": 64,
+      "epoch_seconds_measured": [
+        14.19099820003612,
+        13.616750699991826,
+        13.313884999952279
+      ],
+      "mean_epochs_2_3_seconds": 13.465317849972052,
+      "estimated_100_epochs_seconds_per_seed": 1346.5317849972052,
+      "estimated_100_epochs_seconds_three_seeds": 4039.5953549916157,
+      "peak_allocated_mib": 414.54150390625,
+      "peak_reserved_mib": 466.0
+    }
+  ],
+  "estimated_full_9_run_hours_without_startup": 1.6710866041636716
+}
