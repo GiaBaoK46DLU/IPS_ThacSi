@@ -33,6 +33,8 @@ def evaluate_predictions(true_class, predicted_class, true_xy, predicted_xy, cla
                                                      labels=list(range(len(classes)))).tolist(),
         "mae_xy": np.abs(delta).mean(axis=0).tolist(),
         "rmse_xy": np.sqrt(np.square(delta).mean(axis=0)).tolist(),
+        "mae_coordinates": float(np.abs(delta).mean()),
+        "rmse_coordinates": float(np.sqrt(np.square(delta).mean())),
         "mean_2d": float(errors.mean()), "median_2d": float(np.median(errors)),
         "p90_2d": float(np.quantile(errors, 0.9)), "rmse_2d": float(np.sqrt(np.square(errors).mean())),
         "conditional_mean_2d_joint_correct": float(errors[correct_joint].mean()) if correct_joint.any() else None,
@@ -51,4 +53,21 @@ def evaluate_predictions(true_class, predicted_class, true_xy, predicted_xy, cla
                       "joint_accuracy": float(correct_joint[true_class == i].mean()) if (true_class == i).any() else None,
                       "mean_2d": float(errors[true_class == i].mean()) if (true_class == i).any() else None}
         for i, (b, f) in enumerate(pairs)}
+    metrics["thresholds"] = {str(threshold): {
+        "fraction_2d_within": float((errors <= threshold).mean()),
+        "fraction_joint_correct_and_2d_within": float(((errors <= threshold) & correct_joint).mean())}
+        for threshold in [7, 8, 10, 20]}
+    metrics["target_8m_met"] = bool(metrics["mean_2d"] <= 8)
+    for axis, name in [(0, "building"), (1, "floor")]:
+        metrics["per_" + name] = {str(int(label)): {
+            "count": int((true_pairs[:, axis] == label).sum()),
+            "mean_2d": float(errors[true_pairs[:, axis] == label].mean()) if (true_pairs[:, axis] == label).any() else None,
+            "joint_accuracy": float(correct_joint[true_pairs[:, axis] == label].mean()) if (true_pairs[:, axis] == label).any() else None}
+            for label in sorted(set(pairs[:, axis]))}
+    metrics["error_by_classification_outcome"] = {}
+    for name, mask in [("joint_correct", correct_joint), ("joint_wrong", ~correct_joint),
+                       ("building_wrong", true_pairs[:, 0] != predicted_pairs[:, 0]),
+                       ("floor_wrong", true_pairs[:, 1] != predicted_pairs[:, 1])]:
+        metrics["error_by_classification_outcome"][name] = {
+            "count": int(mask.sum()), "mean_2d": float(errors[mask].mean()) if mask.any() else None}
     return metrics

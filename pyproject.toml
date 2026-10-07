@@ -7,7 +7,7 @@ name = "uji-ips-mixers"
 version = "0.1.0"
 description = "Reproducible Wi-Fi IPS with MLP, MLP-Mixer and RSSI-KAN-Mixer"
 requires-python = ">=3.12,<3.13"
-dependencies = ["numpy==2.2.6", "scikit-learn==1.6.1", "torch==2.9.0"]
+dependencies = ["numpy==2.2.6", "scikit-learn==1.6.1", "torch==2.9.0", "psutil==7.2.2", "matplotlib==3.10.8"]
 
 [project.scripts]
 ips = "ips.cli:main"

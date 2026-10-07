@@ -17,6 +17,7 @@ from .diagnostics import KANDiagnostics
 from .metrics import evaluate_predictions, inverse_xy
 from .models import build_model, parameter_count
 from .runtime import code_hashes, configure_runtime, save_json, software_info
+from .resources import MemorySampler, cuda_memory, synchronize
 
 
 def combined_loss(output, classes, xy, settings):
@@ -45,6 +46,8 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     if run_dir.exists():
         raise FileExistsError(f"Run directory already exists: {run_dir}. Choose a new --run-dir.")
     device = configure_runtime(seed, device_name, config["training"]["threads"])
+    pipeline_started = time.perf_counter()
+    pipeline_memory = MemorySampler().start()
     bundle = load_bundle(ROOT / config["split_dir"])
     train_data = bundle.dataset("train", limit=256 if smoke else None)
     validation_data = bundle.dataset("validation", limit=128 if smoke else None)
@@ -59,12 +62,16 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     optimizer = torch.optim.AdamW(model.parameters(), lr=settings["learning_rate"], weight_decay=settings["weight_decay"])
     diagnostics = KANDiagnostics(model)
     run_dir.mkdir(parents=True)
+    hashes = code_hashes()
+    training_files = ["data.py", "dataset.py", "train.py", "metrics.py", "runtime.py", "resources.py", "diagnostics.py",
+                      "models/networks.py", "models/vendor/efficient_kan.py"]
     metadata = {"run_type": "smoke_check" if smoke else "training",
         "seed": seed, "config": config, "resolved_max_epochs": max_epochs,
         "actual_counts": {"train": len(train_data), "validation": len(validation_data)},
         "trainable_parameters": parameter_count(model), "software": software_info(device),
         "split_manifest_sha256": sha256(bundle.directory / "manifest.json"),
-        "split_manifest": bundle.manifest, "code_sha256": code_hashes(),
+        "split_manifest": bundle.manifest, "code_sha256": hashes,
+        "training_implementation_sha256": {"src/ips/" + name: hashes["src/ips/" + name] for name in training_files},
         "kan_source": json.loads((Path(__file__).parent / "models/vendor/provenance.json").read_text()),
         "selection": "internal_validation_mean_2d", "test_evaluated_during_training": False}
     save_json(run_dir / "run_metadata.json", metadata)
@@ -78,12 +85,17 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     stale = 0
     steps = 0
     diagnostic_log = []
+    synchronize(device)
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
+    training_memory = MemorySampler().start()
     started = time.perf_counter()
     try:
         with (run_dir / "history.csv").open("w", encoding="utf-8", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=fields)
             writer.writeheader()
             for epoch in range(1, max_epochs + 1):
+                synchronize(device)
                 epoch_started = time.perf_counter()
                 diagnostics.reset()
                 model.train()
@@ -130,6 +142,7 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
                 diagnostic_log.append({"epoch": epoch, "sampled_train_batches": min(len(train_loader),
                     settings["kan_diagnostic_batches"]), "layers": diagnostics.summary()})
                 save_json(run_dir / "kan_diagnostics.json", diagnostic_log)
+                synchronize(device)
                 row = dict(zip(fields, [epoch, *map(float, totals / samples), current,
                     metrics["joint_accuracy"], metrics["joint_macro_f1"], optimizer.param_groups[0]["lr"],
                     time.perf_counter() - epoch_started, steps]))
@@ -140,11 +153,22 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
                       f"val_joint_acc={metrics['joint_accuracy']:.4f}", flush=True)
                 if stale >= settings["patience"]:
                     break
+        synchronize(device)
+        elapsed_training = time.perf_counter() - started
+        resources = {"training_phase": training_memory.stop(), "pipeline": pipeline_memory.stop(),
+                     "cuda_training_phase": cuda_memory(device),
+                     "training_phase_seconds": elapsed_training,
+                     "pipeline_seconds_including_data_and_initialization": time.perf_counter() - pipeline_started,
+                     "checkpoint_best_bytes": (run_dir / "best.pt").stat().st_size,
+                     "parameter_tensor_bytes": sum(p.numel()*p.element_size() for p in model.parameters()),
+                     "buffer_tensor_bytes": sum(b.numel()*b.element_size() for b in model.buffers()),
+                     "software": metadata["software"]}
+        save_json(run_dir / "resources.json", resources)
         summary = {"status": "completed", "run_type": metadata["run_type"], "model": config["model"],
                    "seed": seed, "epochs_completed": epoch, "best_epoch": best_epoch,
                    "best_validation_mean_2d": best, "optimizer_steps": steps,
                    "trainable_parameters": metadata["trainable_parameters"],
-                   "training_seconds": time.perf_counter() - started,
+                   "training_seconds": elapsed_training,
                    "test_evaluated": False}
         save_json(run_dir / "summary.json", summary)
         return summary
@@ -153,3 +177,7 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
         raise
     finally:
         diagnostics.close()
+        if not training_memory.stop_event.is_set():
+            training_memory.stop()
+        if not pipeline_memory.stop_event.is_set():
+            pipeline_memory.stop()
