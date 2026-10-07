@@ -1,0 +1,11 @@
+{
+  "source": "data/raw/ujiindoorloc/trainingData.csv",
+  "row_indices": [
+    0,
+    4993,
+    9970,
+    14947,
+    19905
+  ],
+  "purpose": "RSSI-only prediction integration check; not a held-out benchmark"
+}

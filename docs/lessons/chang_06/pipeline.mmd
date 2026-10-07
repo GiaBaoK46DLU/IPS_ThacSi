@@ -1,0 +1,22 @@
+flowchart TD
+    A["CSV gốc + split chặng 5<br/>Hash, AP order, class mapping"]
+    B["Dataset<br/>RSSI → z/mask: B×520×2"]
+    C["MLP baseline<br/>Flatten: B×1040"]
+    D["MLP-Mixer<br/>26 tokens × 40 features"]
+    E["RSSI-KAN-Mixer<br/>KAN ở cả hai nhánh mixing"]
+    F["Hai head dùng chung thiết kế<br/>13 logits + 2 tọa độ chuẩn hóa"]
+    G["Train và validation nội bộ<br/>Loss, AdamW, early stopping"]
+    H["Checkpoint và log<br/>Config, seed, provenance, KAN diagnostics"]
+    I["Load best.pt để dự đoán<br/>Chuyển class ID, inverse tọa độ"]
+    J["Test cuối sau khi chốt mô hình<br/>Chỉ số + predictions theo row index"]
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    C --> F
+    D --> F
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
