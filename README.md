@@ -38,6 +38,20 @@ Lệnh CPU dựa trên [hướng dẫn PyTorch cho 2.9.0](https://pytorch.org/ge
 
 Nếu chưa có raw, chạy `python docs/lessons/chang_05/download_data.py` bằng môi trường dự án, rồi `python -m ips prepare`. Nguồn: [UCI UJIIndoorLoc](https://archive.ics.uci.edu/dataset/310/ujiindoorloc). Dataset được cấp phép CC BY 4.0; cần ghi công khi sử dụng.
 
+### Chạy bằng RTX 4060 Ti 8GB
+
+Môi trường `.venv` dùng bản CPU. Môi trường GPU riêng là `.venv-cuda`, dùng PyTorch 2.9.0 + CUDA 12.8 theo [lệnh chính thức](https://pytorch.org/get-started/previous-versions/#v290). Driver máy được kiểm tra là 591.86. Dòng `CUDA Version` trong `nvidia-smi` nói về khả năng của driver; bản CUDA của PyTorch xem bằng `torch.version.cuda`.
+
+```powershell
+.\scripts\setup_cuda.ps1
+.\scripts\profile_gpu.ps1
+.\scripts\run_experiment.ps1 -Python .\.venv-cuda\Scripts\python.exe -OutputRoot runs/stage7_cuda_v1 -Device cuda
+```
+
+Lệnh profile đo ba epoch trên toàn train/validation với mỗi mô hình, không dùng test; xuất `runs/gpu_calibration_v1/timing_estimate.json`. Thư mục profile phải mới. Ước tính thời gian dùng trung bình epoch 2–3, chưa phải kết quả nghiên cứu. So sánh cuối dùng cùng GPU, batch64, cấu hình và ba seed42/43/44; log CPU ở `runs/stage7_base_v1` được giữ riêng, có đánh dấu dừng để chuyển thiết bị. `resources.json` ghi RAM toàn tiến trình và VRAM allocated/reserved của PyTorch; VRAM này không bao gồm ứng dụng khác trên máy. Giữ FP32 và thiết lập deterministic như cấu hình gốc, chưa dùng AMP.
+
+Bản đo thực tế đã lưu trong Git ở [reports/gpu_calibration_v1](reports/gpu_calibration_v1/README.md), gồm log và provenance, không chứa checkpoint. Tổng ngoại suy cho 9 lượt đủ100 epoch là100,27 phút; lượt thực nghiệm đầy đủ chưa chạy. Muốn khôi phục chính xác các phiên bản thư viện CUDA đã đo, tạo `.venv-cuda` rồi dùng `pip install -r requirements-lock-cuda.txt` bằng Python của môi trường đó.
+
 ## Chạy theo thứ tự
 
 Thử baseline trước:
