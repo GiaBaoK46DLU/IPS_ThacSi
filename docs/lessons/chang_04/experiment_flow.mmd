@@ -1,0 +1,13 @@
+flowchart TD
+    D["Hai tệp UJIIndoorLoc<br/>Kiểm tra schema và bản ghi lặp"] --> DEV["trainingData.csv<br/>Tập phát triển"]
+    D --> TEST["validationData.csv<br/>Giữ làm test cuối"]
+    DEV --> SPLIT["Chia theo nhóm đo<br/>Stratify tòa và tầng, seed 2026"]
+    SPLIT --> TRAIN["Train nội bộ<br/>Fit tiền xử lý có học"]
+    SPLIT --> VAL["Validation nội bộ<br/>Chọn checkpoint và cấu hình"]
+    TRAIN --> FEAT["RSSI và mask<br/>26 token, mỗi token 20 AP"]
+    FEAT --> MODELS["MLP, MLP-Mixer, RSSI-KAN-Mixer<br/>Hai head: tòa và tầng + tọa độ 2D"]
+    MODELS --> VAL
+    VAL --> LOCK["Khóa cấu hình và checkpoint<br/>Ba seed dùng cùng split"]
+    LOCK --> EVAL["Đánh giá cuối<br/>Phân loại, sai số 2D và chi phí"]
+    TEST --> EVAL
+    EVAL --> REPORT["Báo trung bình và độ lệch chuẩn<br/>Phân tích lỗi, giới hạn kết luận"]

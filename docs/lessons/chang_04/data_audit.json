@@ -1,0 +1,155 @@
+{
+  "checked_on": "2026-10-07",
+  "kind": "data_audit_not_model_results",
+  "files": {
+    "trainingData.csv": {
+      "path": "data/raw/ujiindoorloc/trainingData.csv",
+      "sha256": "45ca0128bd12019c976bb4793e407c979c82995d7a5940ab7288620247905168",
+      "row_count": 19937,
+      "column_count": 529,
+      "ap_count": 520,
+      "building_floor_counts": {
+        "0_0": 1059,
+        "0_1": 1356,
+        "0_2": 1443,
+        "0_3": 1391,
+        "1_0": 1368,
+        "1_1": 1484,
+        "1_2": 1396,
+        "1_3": 948,
+        "2_0": 1942,
+        "2_1": 2162,
+        "2_2": 1577,
+        "2_3": 2709,
+        "2_4": 1102
+      },
+      "user_counts": {
+        "1": 2737,
+        "2": 1091,
+        "3": 192,
+        "4": 374,
+        "5": 610,
+        "6": 980,
+        "7": 1383,
+        "8": 507,
+        "9": 1066,
+        "10": 913,
+        "11": 4516,
+        "12": 437,
+        "13": 841,
+        "14": 1596,
+        "15": 498,
+        "16": 1032,
+        "17": 724,
+        "18": 440
+      },
+      "phone_counts": {
+        "1": 507,
+        "3": 610,
+        "6": 1383,
+        "7": 1596,
+        "8": 913,
+        "10": 440,
+        "11": 498,
+        "13": 4516,
+        "14": 4835,
+        "16": 192,
+        "17": 841,
+        "18": 374,
+        "19": 980,
+        "22": 724,
+        "23": 1091,
+        "24": 437
+      },
+      "rssi_empty_cells": 0,
+      "rssi_sentinel_100_cells": 10008477,
+      "all_aps_undetected_rows": 76,
+      "aps_never_detected": 55,
+      "duplicate_complete_rows_excess": 637,
+      "duplicate_rssi_vectors_excess": 852,
+      "timestamp_range_unix": [
+        1369908924,
+        1371737745
+      ],
+      "coordinate_ranges": {
+        "LONGITUDE": [
+          -7691.338399998844,
+          -7300.818990092725
+        ],
+        "LATITUDE": [
+          4864745.745015971,
+          4865016.687799998
+        ]
+      }
+    },
+    "validationData.csv": {
+      "path": "data/raw/ujiindoorloc/validationData.csv",
+      "sha256": "5f90c536648cd657b2c516d20c4e0968d4003279ea6bd5d5d5322d3f1e8905c0",
+      "row_count": 1111,
+      "column_count": 529,
+      "ap_count": 520,
+      "building_floor_counts": {
+        "0_0": 78,
+        "0_1": 208,
+        "0_2": 165,
+        "0_3": 85,
+        "1_0": 30,
+        "1_1": 143,
+        "1_2": 87,
+        "1_3": 47,
+        "2_0": 24,
+        "2_1": 111,
+        "2_2": 54,
+        "2_3": 40,
+        "2_4": 39
+      },
+      "user_counts": {
+        "0": 1111
+      },
+      "phone_counts": {
+        "0": 120,
+        "2": 52,
+        "4": 69,
+        "5": 17,
+        "9": 77,
+        "12": 70,
+        "13": 369,
+        "14": 28,
+        "15": 36,
+        "20": 213,
+        "21": 60
+      },
+      "rssi_empty_cells": 0,
+      "rssi_sentinel_100_cells": 559416,
+      "all_aps_undetected_rows": 0,
+      "aps_never_detected": 153,
+      "duplicate_complete_rows_excess": 0,
+      "duplicate_rssi_vectors_excess": 5,
+      "timestamp_range_unix": [
+        1379578367,
+        1381247836
+      ],
+      "coordinate_ranges": {
+        "LONGITUDE": [
+          -7695.93875492993,
+          -7299.786516730871
+        ],
+        "LATITUDE": [
+          4864748.01548531,
+          4865017.364684202
+        ]
+      }
+    }
+  },
+  "cross_file_exact_overlap_distinct": {
+    "rssi": 0,
+    "rows": 0,
+    "locations": 10
+  },
+  "notes": [
+    "Duplicate excess means total rows minus distinct signatures.",
+    "All validation USERID values are 0; this is a validation-user code, not evidence of one physical person.",
+    "Coordinate ranges are from raw files; no CRS code inferred.",
+    "No training, prediction, or IPS metric is produced in this audit."
+  ]
+}
