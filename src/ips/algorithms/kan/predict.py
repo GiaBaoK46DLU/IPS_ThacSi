@@ -5,10 +5,11 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from .data import csv_bytes, feature_transform, sha256
-from .dataset import load_bundle
-from .data_access.repository import read_fingerprints
-from .metrics import evaluate_predictions, inverse_xy
+from ...data import csv_bytes, feature_transform, sha256
+from ...data_access import load_bundle
+from .dataset import FingerprintDataset
+from ...data_access.repository import read_fingerprints
+from ...metrics import evaluate_predictions, inverse_xy
 from .runtime import configure_runtime, load_checkpoint, save_json
 from .train import infer
 
@@ -59,7 +60,7 @@ def evaluate(checkpoint_path: Path, split_dir: Path, split: str, output_dir: Pat
         raise ValueError("Checkpoint and dataset preprocessing/mapping differ.")
     if split == "test" and checkpoint["run_type"] == "smoke_check":
         raise ValueError("Smoke checkpoints are for pipeline checks; use a finalized training checkpoint for test.")
-    dataset = bundle.dataset(split)
+    dataset = FingerprintDataset.from_split(bundle.split(split))
     loader = DataLoader(dataset, batch_size=64, shuffle=False, num_workers=0)
     logits, xy, true_classes = infer(model, loader, device)
     rows, predicted, coordinates = prediction_rows(logits, xy, checkpoint, dataset.indices.numpy())

@@ -17,18 +17,18 @@ import torch
 from ips.algorithms.base import Algorithm
 from ips.algorithms.huim.adapter import HUIMAlgorithm
 from ips.algorithms.llm.adapter import LLMAlgorithm
-from ips.algorithms.kan_mixer import KANMixerAlgorithm
+from ips.algorithms.kan import KANMixerAlgorithm
 from ips.cli import main
 from ips.data import AP_COLUMNS, OUTPUT, ROOT, feature_transform, json_bytes, sha256
 from ips.data_access import FingerprintInputs, FingerprintSplit, load_bundle
-from ips.dataset import FingerprintDataset
+from ips.algorithms.kan.dataset import FingerprintDataset
 from ips.experiments.contracts import AlgorithmExecution, ExperimentConfig, IPSPredictions
 from ips.experiments.evaluator import IPSEvaluator
 from ips.experiments.factory import AlgorithmFactory, AlgorithmNotImplementedError, UnknownAlgorithmError, default_factory
 from ips.experiments.runner import ExperimentRunner
 from ips.metrics import evaluate_predictions, inverse_xy
-from ips.models import build_model
-from ips.runtime import read_config
+from ips.algorithms.kan.models import build_model
+from ips.algorithms.kan.runtime import read_config
 
 
 class TrainCentroidFixture(Algorithm):
@@ -98,7 +98,8 @@ class FactoryTests(unittest.TestCase):
     def test_shared_data_is_torch_independent(self):
         output = subprocess.check_output([sys.executable, "-c",
             "import sys; import ips.data_access; from ips.experiments.runner import ExperimentRunner; "
-            "assert 'torch' not in sys.modules; print('PASS')"], cwd=ROOT, text=True)
+            "assert 'torch' not in sys.modules; "
+            "assert not hasattr(ips.data_access.Bundle, 'dataset'); print('PASS')"], cwd=ROOT, text=True)
         self.assertIn("PASS", output)
 
     def test_shared_split_preserves_original_indices_labels_aps_and_tensors(self):
@@ -247,7 +248,7 @@ class FactoryTests(unittest.TestCase):
             self.assertFalse(config.output_dir.exists())
 
     def test_checkpoint_v1_fixture_is_loaded_by_algorithm_with_identical_predictions(self):
-        settings = read_config(ROOT/"configs/kan_mixer.json")
+        settings = read_config(ROOT/"src/ips/algorithms/kan/configs/model.json")
         model = build_model(settings, len(self.bundle.classes)).eval()
         info = self.train.info
         with tempfile.TemporaryDirectory() as tmp:
@@ -272,14 +273,14 @@ class FactoryTests(unittest.TestCase):
                 wrong.execute(self.validation)
 
     def test_legacy_cli_preserves_train_predict_evaluate_and_check_options(self):
-        with patch("ips.train.train") as training:
+        with patch("ips.algorithms.kan.train.train") as training:
             main(["train", "--device", "cpu", "--epochs", "1", "--smoke", "--run-dir", "runs/unit"])
             self.assertEqual(training.call_args.args[0]["model"], "kan_mixer")
             self.assertEqual(training.call_args.args[-2:], (1, True))
-        with patch("ips.predict.predict") as prediction:
+        with patch("ips.algorithms.kan.predict.predict") as prediction:
             main(["predict", "--checkpoint", "v1.pt", "--csv", "data.csv", "--output", "pred.csv", "--device", "cpu"])
             self.assertEqual(prediction.call_args.args, (Path("v1.pt"), Path("data.csv"), Path("pred.csv"), "cpu"))
-        with patch("ips.predict.evaluate") as evaluation:
+        with patch("ips.algorithms.kan.predict.evaluate") as evaluation:
             main(["evaluate", "--checkpoint", "v1.pt", "--output-dir", "runs/unit", "--device", "cpu"])
             self.assertEqual(evaluation.call_args.args[2], "validation")
         with patch("sys.stdout", new=io.StringIO()) as output:

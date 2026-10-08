@@ -5,8 +5,8 @@ import time
 import numpy as np
 import torch
 
-from .data import feature_transform, sha256
-from .metrics import inverse_xy
+from ...data import feature_transform, sha256
+from ...metrics import inverse_xy
 from .predict import read_fingerprints
 from .resources import MemorySampler, cuda_memory, synchronize
 from .runtime import configure_runtime, load_checkpoint, save_json, software_info

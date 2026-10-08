@@ -52,7 +52,7 @@ class AlgorithmFactory:
 
 
 def default_factory() -> AlgorithmFactory:
-    from ..algorithms.kan_mixer import KANMixerAlgorithm
+    from ..algorithms.kan import KANMixerAlgorithm
     factory = AlgorithmFactory()
     factory.register("kan_mixer", KANMixerAlgorithm)
     return factory

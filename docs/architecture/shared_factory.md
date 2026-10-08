@@ -18,8 +18,8 @@ FastKAN/S-KAN chưa được triển khai.
 5. Algorithm.predict(FingerprintInputs) nhận input không có nhãn vị trí, giữ nguồn/thứ tự, trả IPSPredictions.
 6. IPSEvaluator tính metric có nghĩa cho output hiện có; ReportExporter ghi artifact; Runner trả RunResult.
 
-KANMixerAlgorithm trong src/ips/algorithms/kan_mixer.py giữ các bước tạo tensor, gọi train.py hoặc
-load_checkpoint(v1), suy luận và inverse tọa độ. Mạng PyTorch vẫn nằm trong models/networks.py:
+KANMixerAlgorithm trong src/ips/algorithms/kan/algorithm.py giữ các bước tạo tensor, gọi train.py hoặc
+load_checkpoint(v1), suy luận và inverse tọa độ. Mạng PyTorch nằm trong src/ips/algorithms/kan/models/networks.py:
 RSSIMixer → MixerBlock → token/channel KANLinear. Algorithm không phải torch.nn.Module.
 Embedding và hai head vẫn cần nn.Linear; đó là thành phần của KAN-Mixer, không phải baseline MLP riêng.
 
@@ -27,7 +27,7 @@ Embedding và hai head vẫn cần nn.Linear; đó là thành phần của KAN-M
 
 | Phần | File/thư mục | Người phụ trách |
 |---|---|---|
-| KAN | algorithms/kan_mixer.py, models/, backend tensor/train | thành viên KAN |
+| KAN | algorithms/kan/ (mã, config, vendor, tests) | thành viên KAN |
 | LLM | algorithms/llm/ | thành viên LLM |
 | HUIM | algorithms/huim/ | thành viên HUIM |
 | Hợp đồng và đánh giá chung | algorithms/base.py, data_access/, experiments/, metrics.py | cả nhóm review |
@@ -93,7 +93,17 @@ quy tắc itemset→tòa/tầng/xy, không khớp/nhiều khớp và chi phí mi
 
 ## Phần cá nhân và lịch sử
 
-MLP/MLP-Mixer, tài liệu học cũ, báo cáo so sánh và script suite cũ là ignored; bản trên máy được giữ,
+MLP/MLP-Mixer, tài liệu học cũ, báo cáo so sánh và script suite cũ là ignored; bản trên máy được giữ trong personal_learning/,
 không còn là dependency của dự án chung. Xem .gitignore và README root để biết phạm vi.
-configs/kan_mixer.json là cấu hình chung; configs/base.json cũ chỉ còn bản cá nhân trên máy.
+src/ips/algorithms/kan/configs/model.json là cấu hình KAN; config baseline cũ nằm trong personal_learning/archive/workspace/configs/.
 Checkpoint KAN v1 vẫn được hỗ trợ. Suite lịch sử phải tái lập trên commit gốc, không nới audit hash hoặc sửa số liệu cũ.
+
+## Thư mục review KAN
+
+[algorithms/kan/](../../src/ips/algorithms/kan/README.md) chứa toàn bộ triển khai KAN,
+kể cả config và tests riêng. Phần dữ liệu/split, hợp đồng Algorithm, Factory/Runner và metrics vẫn dùng chung.
+Root tests/test_pipeline.py chỉ nối vào tests KAN để unittest discovery tiếp tục hoạt động.
+Các alias backend cũ đã bỏ; import Python dùng ips.algorithms.kan.*.
+Dữ liệu dùng chung chỉ cung cấp NumPy/split, không còn Bundle.dataset() phụ thuộc KAN.
+Hai tên config cũ configs/kan_mixer.json và configs/experiments/kan_mixer_smoke.json
+được ánh xạ khi không có file cũ, để giữ lệnh CLI cũ.

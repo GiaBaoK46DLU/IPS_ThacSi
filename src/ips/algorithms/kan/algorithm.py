@@ -3,10 +3,12 @@ import csv
 import json
 from pathlib import Path
 
-from .base import Algorithm
-from ..data import ROOT, sha256
-from ..data_access import FingerprintInputs, FingerprintSplit
-from ..experiments.contracts import AlgorithmExecution, ExperimentConfig, IPSPredictions, ModelDiagram
+from .paths import MODEL_CONFIG
+
+from ..base import Algorithm
+from ...data import ROOT, sha256
+from ...data_access import FingerprintInputs, FingerprintSplit
+from ...experiments.contracts import AlgorithmExecution, ExperimentConfig, IPSPredictions, ModelDiagram
 
 
 class KANMixerAlgorithm(Algorithm):
@@ -30,9 +32,9 @@ class KANMixerAlgorithm(Algorithm):
             raise ValueError("KAN-Mixer preparation requires the train split.")
         self._train = train
         if "checkpoint" not in self.config.params:
-            from ..dataset import FingerprintDataset
-            from ..runtime import read_config
-            path = Path(self.config.params.get("model_config", ROOT/"configs/kan_mixer.json"))
+            from .dataset import FingerprintDataset
+            from .runtime import read_config
+            path = Path(self.config.params.get("model_config", MODEL_CONFIG))
             path = path if path.is_absolute() else ROOT/path
             self._model_config = read_config(path)
             self._model_config["model"] = self.model_id
@@ -43,15 +45,15 @@ class KANMixerAlgorithm(Algorithm):
     def execute(self, validation: FingerprintSplit | None) -> AlgorithmExecution:
         if self._train is None:
             raise RuntimeError("Call prepare(train) before execute().")
-        from ..runtime import configure_runtime, load_checkpoint
+        from .runtime import configure_runtime, load_checkpoint
         output = self.config.output_dir/"algorithm"
         artifacts, history, resources = {}, None, None
         if "checkpoint" in self.config.params:
             path = Path(self.config.params["checkpoint"])
             path = path if path.is_absolute() else ROOT/path
         else:
-            from ..dataset import FingerprintDataset
-            from ..train import train
+            from .dataset import FingerprintDataset
+            from .train import train
             if validation is None or validation.name != "validation":
                 raise ValueError("KAN-Mixer training requires internal validation, never test.")
             if (validation.info != self._train.info or
@@ -90,9 +92,9 @@ class KANMixerAlgorithm(Algorithm):
             raise RuntimeError("Call execute() to train/load a selected checkpoint before predict().")
         import torch
         from torch.utils.data import DataLoader, TensorDataset
-        from ..data import feature_transform
-        from ..metrics import inverse_xy
-        from ..train import infer
+        from ...data import feature_transform
+        from ...metrics import inverse_xy
+        from .train import infer
         features = torch.from_numpy(feature_transform(inputs.rssi))
         loader = DataLoader(TensorDataset(features, torch.zeros(len(inputs), dtype=torch.long),
             torch.zeros(len(inputs), 2)), batch_size=64, shuffle=False, num_workers=0)

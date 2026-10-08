@@ -9,8 +9,9 @@ import numpy as np
 import sklearn
 import torch
 
-from .data import ROOT, json_bytes, sha256
+from ...data import ROOT, json_bytes, sha256
 from .models import build_model
+from .paths import resolve_config_path
 
 
 def configure_runtime(seed: int, device: str, threads: int = 4):
@@ -33,6 +34,7 @@ def configure_runtime(seed: int, device: str, threads: int = 4):
 
 
 def read_config(path: Path) -> dict:
+    path = resolve_config_path(path)
     config = json.loads(path.read_text(encoding="utf-8"))
     required = {"model", "split_dir", "mixer", "kan", "loss", "training"}
     if not required.issubset(config):

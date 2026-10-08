@@ -69,16 +69,7 @@ class RSSIMixer(nn.Module):
 def build_model(config: dict, classes: int = 13) -> nn.Module:
     name = config["model"]
     if name in ("mlp", "mlp_mixer"):
-        # Optional local study code, excluded from the shared repository.
-        from importlib.util import module_from_spec, spec_from_file_location
-        from ..data import ROOT
-        path = ROOT/"personal_learning/legacy_models.py"
-        if not path.is_file():
-            raise ValueError("Personal MLP baselines are excluded from this shared project; choose kan_mixer.")
-        spec = spec_from_file_location("ips_personal_legacy_models", path)
-        module = module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return module.build_model(config, classes)
+        raise ValueError("Personal MLP baselines are excluded from this shared project; choose kan_mixer.")
     if name == "kan_mixer":
         if config["kan"]["base_activation"] != "SiLU":
             raise ValueError("Pinned IPS protocol uses the efficient-kan SiLU base activation.")

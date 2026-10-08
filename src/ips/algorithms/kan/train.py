@@ -11,10 +11,11 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from .data import ROOT, sha256
-from .dataset import load_bundle
+from ...data import ROOT, sha256
+from ...data_access import load_bundle
+from .dataset import FingerprintDataset
 from .diagnostics import KANDiagnostics
-from .metrics import evaluate_predictions, inverse_xy
+from ...metrics import evaluate_predictions, inverse_xy
 from .models import build_model, parameter_count
 from .runtime import code_hashes, configure_runtime, save_json, software_info
 from .resources import MemorySampler, cuda_memory, synchronize
@@ -54,8 +55,8 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     pipeline_memory = MemorySampler().start()
     if not any(supplied):
         bundle = load_bundle(ROOT / config["split_dir"])
-        train_data = bundle.dataset("train", limit=256 if smoke else None)
-        validation_data = bundle.dataset("validation", limit=128 if smoke else None)
+        train_data = FingerprintDataset.from_split(bundle.split("train", limit=256 if smoke else None))
+        validation_data = FingerprintDataset.from_split(bundle.split("validation", limit=128 if smoke else None))
     settings = config["training"]
     max_epochs = 1 if smoke else (epochs if epochs is not None else settings["max_epochs"])
     generator = torch.Generator().manual_seed(seed)
@@ -68,8 +69,10 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     diagnostics = KANDiagnostics(model)
     run_dir.mkdir(parents=True)
     hashes = code_hashes()
-    training_files = ["data.py", "dataset.py", "train.py", "metrics.py", "runtime.py", "resources.py", "diagnostics.py",
-                      "models/networks.py", "models/vendor/efficient_kan.py"]
+    training_files = ["data.py", "metrics.py", "data_access/contracts.py", "data_access/repository.py"]
+    training_files += ["algorithms/kan/" + name for name in
+        ["algorithm.py", "dataset.py", "train.py", "predict.py", "runtime.py", "resources.py", "diagnostics.py",
+         "models/networks.py", "models/vendor/efficient_kan.py"]]
     metadata = {"run_type": "smoke_check" if smoke else "training",
         "seed": seed, "config": config, "resolved_max_epochs": max_epochs,
         "actual_counts": {"train": len(train_data), "validation": len(validation_data)},

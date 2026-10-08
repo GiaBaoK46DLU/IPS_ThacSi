@@ -1,13 +1,12 @@
-"""PyTorch representation only. Legacy Bundle/load_bundle imports remain valid."""
+"""KAN PyTorch representation of shared NumPy fingerprint splits."""
 from __future__ import annotations
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from .data import feature_transform
-from .data_access import Bundle, FingerprintSplit, load_bundle
-from .data_access.repository import index_file, read_json
+from ...data import feature_transform
+from ...data_access import FingerprintSplit
 
 
 class FingerprintDataset(Dataset):
