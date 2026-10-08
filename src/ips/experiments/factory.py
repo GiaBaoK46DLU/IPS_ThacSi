@@ -51,8 +51,8 @@ class AlgorithmFactory:
 
 
 def default_factory() -> AlgorithmFactory:
-    from ..algorithms.neural import KANMixerAlgorithm, MLPAlgorithm, MLPMixerAlgorithm
-    from ..algorithms.hierarchical import HierarchicalAlgorithm
+    from ..algorithms.neural.adapter import KANMixerAlgorithm, MLPAlgorithm, MLPMixerAlgorithm
+    from ..algorithms.hierarchical.adapter import HierarchicalAlgorithm
     factory = AlgorithmFactory()
     for name, implementation in (("kan_mixer", KANMixerAlgorithm), ("mlp", MLPAlgorithm),
                                   ("mlp_mixer", MLPMixerAlgorithm),

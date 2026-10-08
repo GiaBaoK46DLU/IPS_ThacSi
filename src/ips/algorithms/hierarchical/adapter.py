@@ -3,9 +3,9 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsRegressor
 
-from .base import Algorithm
-from ..data_access.contracts import FingerprintInputs, FingerprintSplit
-from ..experiments.contracts import AlgorithmExecution, ExperimentConfig, IPSPredictions
+from ..base import Algorithm
+from ...data_access.contracts import FingerprintInputs, FingerprintSplit
+from ...experiments.contracts import AlgorithmExecution, ExperimentConfig, IPSPredictions
 
 class HierarchicalAlgorithm(Algorithm):
     """
@@ -77,8 +77,26 @@ class HierarchicalAlgorithm(Algorithm):
         )
         self.reg_coords.fit(X_train_coords, y_train_coords)
 
+        import joblib
+        output = self.config.output_dir / "algorithm"
+        output.mkdir(parents=True, exist_ok=True)
+        
+        building_path = output / "model_building.pkl"
+        floor_path = output / "model_floor.pkl"
+        coords_path = output / "model_coordinates.pkl"
+        
+        joblib.dump(self.clf_building, building_path)
+        joblib.dump(self.clf_floor, floor_path)
+        joblib.dump(self.reg_coords, coords_path)
+        
+        artifacts = {
+            "model_building": building_path,
+            "model_floor": floor_path,
+            "model_coordinates": coords_path
+        }
+
         # Trả về cờ finalized=True vì scikit-learn training là synchronous và hoàn tất ngay lập tức
-        return AlgorithmExecution(finalized=True, run_type="scikit-learn-training", history=None, artifacts={}, resources=None)
+        return AlgorithmExecution(finalized=True, run_type="scikit-learn-training", history=None, artifacts=artifacts, resources=None)
 
     def predict(self, inputs: FingerprintInputs) -> IPSPredictions:
         if self.clf_building is None:

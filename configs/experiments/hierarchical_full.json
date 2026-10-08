@@ -6,7 +6,7 @@
     "penalty_weight": 1000.0
   },
   "split_dir": "data/processed/uji_group_split_v1",
-  "output_dir": "runs/hierarchical_full_v1",
+  "output_dir": "runs/hierarchical_full_v2",
   "task": "position",
   "device": "cpu",
   "seed": 42,
