@@ -9,28 +9,30 @@
   "components": [
     { "id": "cli", "type": "external", "label": "CLI / Scripts", "sublabel": "PowerShell", "pos": [40, 200], "size": [120, 60] },
     { "id": "runner", "type": "backend", "label": "ExperimentRunner", "sublabel": "src/ips/experiments", "pos": [250, 200], "size": [150, 60] },
-    { "id": "factory", "type": "backend", "label": "AlgorithmFactory", "sublabel": "Registry", "pos": [480, 200], "size": [150, 60] },
-    { "id": "kan", "type": "backend", "label": "RSSI-KAN-Mixer", "sublabel": "efficient-kan", "pos": [710, 100], "size": [140, 60] },
-    { "id": "mlp", "type": "backend", "label": "MLP & MLP-Mixer", "sublabel": "Baseline", "pos": [710, 200], "size": [140, 60] },
-    { "id": "llm", "type": "backend", "label": "LLM / HUIM", "sublabel": "Abstract Adapter", "pos": [710, 300], "size": [140, 60], "tag": "future" },
+    { "id": "factory", "type": "backend", "label": "AlgorithmFactory", "sublabel": "Registry", "pos": [490, 200], "size": [150, 60] },
+    { "id": "neural", "type": "backend", "label": "Neural Algorithms", "sublabel": "MLP / KAN / Mixers", "pos": [740, 80], "size": [160, 60] },
+    { "id": "hierarchical", "type": "backend", "label": "Hierarchical", "sublabel": "RF + KNN", "pos": [740, 160], "size": [160, 60] },
+    { "id": "llm", "type": "backend", "label": "LLM Adapter", "sublabel": "Prompt/API", "pos": [740, 240], "size": [160, 60], "tag": "future" },
+    { "id": "huim", "type": "backend", "label": "HUIM Adapter", "sublabel": "Itemsets", "pos": [740, 320], "size": [160, 60], "tag": "future" },
     { "id": "data", "type": "database", "label": "UJIIndoorLoc", "sublabel": "NumPy splits", "pos": [250, 360], "size": [150, 60] },
-    { "id": "runs", "type": "database", "label": "runs/", "sublabel": "Checkpoints & CSV", "pos": [480, 360], "size": [150, 60] }
+    { "id": "runs", "type": "database", "label": "runs/", "sublabel": "Checkpoints & CSV", "pos": [490, 360], "size": [150, 60] }
   ],
   "boundaries": [
-    { "kind": "region", "label": "src/ips/algorithms", "wraps": ["kan", "mlp", "llm"] }
+    { "kind": "region", "label": "src/ips/algorithms", "wraps": ["neural", "hierarchical", "llm", "huim"] }
   ],
   "connections": [
     { "id": "cli-to-runner", "from": "cli", "to": "runner", "label": "run config" },
     { "id": "runner-to-factory", "from": "runner", "to": "factory", "label": "instantiates" },
-    { "id": "factory-to-kan", "from": "factory", "to": "kan", "label": "kan_mixer", "fromSide": "right", "toSide": "left", "via": [[650, 230], [650, 130]] },
-    { "id": "factory-to-mlp", "from": "factory", "to": "mlp", "label": "mlp", "fromSide": "right", "toSide": "left" },
-    { "id": "factory-to-llm", "from": "factory", "to": "llm", "label": "llm", "variant": "dashed", "fromSide": "right", "toSide": "left", "via": [[650, 230], [650, 330]] },
+    { "id": "factory-to-neural", "from": "factory", "to": "neural", "label": "neural", "fromSide": "right", "toSide": "left", "via": [[660, 230], [660, 110]] },
+    { "id": "factory-to-hierarchical", "from": "factory", "to": "hierarchical", "label": "hierarchical", "fromSide": "right", "toSide": "left", "via": [[660, 230], [660, 190]] },
+    { "id": "factory-to-llm", "from": "factory", "to": "llm", "label": "llm", "variant": "dashed", "fromSide": "right", "toSide": "left", "via": [[660, 230], [660, 270]] },
+    { "id": "factory-to-huim", "from": "factory", "to": "huim", "label": "huim", "variant": "dashed", "fromSide": "right", "toSide": "left", "via": [[660, 230], [660, 350]] },
     { "id": "runner-data", "from": "runner", "to": "data", "label": "loads split", "fromSide": "bottom", "toSide": "top" },
-    { "id": "runner-runs", "from": "runner", "to": "runs", "label": "exports", "fromSide": "bottom", "toSide": "top", "via": [[325, 280], [555, 280]] }
+    { "id": "runner-runs", "from": "runner", "to": "runs", "label": "exports", "fromSide": "bottom", "toSide": "top", "via": [[325, 280], [565, 280]] }
   ],
   "cards": [
     { "dot": "cyan", "title": "Orchestration", "items": ["CLI invokes ExperimentRunner via configs", "Runner manages evaluation splits & metrics"] },
-    { "dot": "emerald", "title": "Algorithm Factory", "items": ["AlgorithmFactory acts as a registry", "Initializes KAN, MLP, and MLP-Mixer models"] },
+    { "dot": "emerald", "title": "Algorithm Factory", "items": ["AlgorithmFactory acts as a registry", "Initializes Neural, Hierarchical, LLM, and HUIM algorithms"] },
     { "dot": "rose", "title": "Data & Outputs", "items": ["Reads UJIIndoorLoc NumPy data", "Outputs IPSPredictions to runs/ dir"] }
   ]
 }
