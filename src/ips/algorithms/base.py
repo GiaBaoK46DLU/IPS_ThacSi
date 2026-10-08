@@ -1,4 +1,5 @@
 """Algorithm is an IPS lifecycle, never a torch.nn.Module interface."""
+from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from ..data_access import FingerprintInputs, FingerprintSplit

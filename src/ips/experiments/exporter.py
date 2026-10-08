@@ -1,4 +1,5 @@
 """Write per-run artifacts without modifying historical reports."""
+from __future__ import annotations
 import csv
 from pathlib import Path
 

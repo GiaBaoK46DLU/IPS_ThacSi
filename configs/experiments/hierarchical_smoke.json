@@ -1,0 +1,16 @@
+{
+  "algorithm_id": "hierarchical",
+  "params": {
+    "n_estimators": 5,
+    "n_neighbors": 3,
+    "penalty_weight": 1000.0
+  },
+  "split_dir": "data/processed/uji_group_split_v1",
+  "output_dir": "runs/hierarchical_smoke_v1",
+  "task": "position",
+  "device": "cpu",
+  "seed": 42,
+  "smoke": true,
+  "evaluation_splits": ["validation"]
+}
+

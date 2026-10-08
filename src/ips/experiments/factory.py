@@ -1,4 +1,5 @@
 """Registry factory at the IPS algorithm level; no fake LLM/HUIM registration."""
+from __future__ import annotations
 import copy
 import inspect
 
@@ -51,8 +52,10 @@ class AlgorithmFactory:
 
 def default_factory() -> AlgorithmFactory:
     from ..algorithms.neural import KANMixerAlgorithm, MLPAlgorithm, MLPMixerAlgorithm
+    from ..algorithms.hierarchical import HierarchicalAlgorithm
     factory = AlgorithmFactory()
     for name, implementation in (("kan_mixer", KANMixerAlgorithm), ("mlp", MLPAlgorithm),
-                                  ("mlp_mixer", MLPMixerAlgorithm)):
+                                  ("mlp_mixer", MLPMixerAlgorithm),
+                                  ("hierarchical", HierarchicalAlgorithm)):
         factory.register(name, implementation)
     return factory

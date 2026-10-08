@@ -1,4 +1,5 @@
 """Evaluate only outputs an algorithm actually supplies, using legacy IPS definitions."""
+from __future__ import annotations
 import numpy as np
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 

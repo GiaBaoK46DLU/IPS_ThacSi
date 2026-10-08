@@ -1,4 +1,5 @@
 """Wrap the existing neural pipeline; torch imports stay inside this backend."""
+from __future__ import annotations
 import csv
 import json
 from abc import abstractmethod

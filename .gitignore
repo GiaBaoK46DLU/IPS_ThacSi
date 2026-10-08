@@ -8,3 +8,6 @@ runs/
 .DS_Store
 # Temporary owner files created when Office documents are open.
 ~$*
+.venv39/
+diagram-design/
+.archify/
