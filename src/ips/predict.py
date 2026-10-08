@@ -1,38 +1,16 @@
 """Dự đoán từ RSSI mới và đánh giá checkpoint trên split đã lưu."""
-import csv
 from pathlib import Path
 
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from .data import AP_COLUMNS, COLUMNS, csv_bytes, feature_transform, sha256
+from .data import csv_bytes, feature_transform, sha256
 from .dataset import load_bundle
+from .data_access.repository import read_fingerprints
 from .metrics import evaluate_predictions, inverse_xy
 from .runtime import configure_runtime, load_checkpoint, save_json
 from .train import infer
-
-
-def read_fingerprints(path: Path, ap_order: list[str]):
-    if ap_order != AP_COLUMNS:
-        raise ValueError("Checkpoint uses unsupported AP ordering.")
-    with path.open(encoding="utf-8-sig", newline="") as stream:
-        reader = csv.reader(stream)
-        header = next(reader, [])
-        if header not in [AP_COLUMNS, COLUMNS]:
-            raise ValueError("Input CSV must have ordered WAP001..WAP520, optionally followed by the nine original metadata columns.")
-        rows = []
-        for line, row in enumerate(reader, 2):
-            if len(row) != len(header) or any(not value.strip() for value in row[:520]):
-                raise ValueError(f"Invalid input row at CSV line {line}.")
-            rows.append(row[:520])
-    if not rows:
-        raise ValueError("Input CSV contains no fingerprints.")
-    rssi = np.asarray(rows, dtype=np.float64)
-    valid = np.isfinite(rssi) & (rssi == np.floor(rssi)) & ((rssi == 100) | ((rssi >= -104) & (rssi <= 0)))
-    if not valid.all():
-        raise ValueError("Input contains invalid RSSI, NaN or infinity.")
-    return rssi.astype(np.int16)
 
 
 def prediction_rows(logits, normalized_xy, checkpoint, indices):

@@ -39,18 +39,23 @@ def infer(model, loader, device):
 
 
 def train(config: dict, run_dir: Path, seed: int, device_name: str,
-          epochs: int | None = None, smoke: bool = False):
+          epochs: int | None = None, smoke: bool = False, *,
+          bundle=None, train_data=None, validation_data=None):
     if epochs is not None and epochs < 1:
         raise ValueError("epochs must be positive.")
+    supplied = [bundle is not None, train_data is not None, validation_data is not None]
+    if any(supplied) and not all(supplied):
+        raise ValueError("Supply bundle metadata, train_data and validation_data together.")
     # Mỗi lượt có thư mục mới, tránh vô tình trộn log/checkpoint các mô hình.
     if run_dir.exists():
         raise FileExistsError(f"Run directory already exists: {run_dir}. Choose a new --run-dir.")
     device = configure_runtime(seed, device_name, config["training"]["threads"])
     pipeline_started = time.perf_counter()
     pipeline_memory = MemorySampler().start()
-    bundle = load_bundle(ROOT / config["split_dir"])
-    train_data = bundle.dataset("train", limit=256 if smoke else None)
-    validation_data = bundle.dataset("validation", limit=128 if smoke else None)
+    if not any(supplied):
+        bundle = load_bundle(ROOT / config["split_dir"])
+        train_data = bundle.dataset("train", limit=256 if smoke else None)
+        validation_data = bundle.dataset("validation", limit=128 if smoke else None)
     settings = config["training"]
     max_epochs = 1 if smoke else (epochs if epochs is not None else settings["max_epochs"])
     generator = torch.Generator().manual_seed(seed)

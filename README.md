@@ -4,6 +4,51 @@ Dự án học và thực nghiệm PyTorch trên UJIIndoorLoc. Mỗi mô hình n
 
 [Chặng 8: tổng kết và thuyết trình](docs/lessons/chang_08/README.md) gồm sơ đồ nghiên cứu, câu hỏi/giả thuyết, checklist và [PowerPoint 20 slide](docs/lessons/chang_08/presentation/IPS_KAN_Mixer_UJIIndoorLoc.pptx), kèm PDF và ghi chú. Slide dùng kết quả thật của chặng 7: mean2D test khoảng 15,5–15,8 m; mục tiêu 8 m chưa đạt.
 
+## Factory dùng chung cho nhóm KAN / LLM / HUIM
+
+Đã có registry `AlgorithmFactory` và `ExperimentRunner` ở cấp thuật toán IPS, cùng hợp đồng dữ liệu NumPy
+và đầu ra `IPSPredictions`. Ba ID chạy được là `kan_mixer` (efficient-kan B-spline), `mlp`, `mlp_mixer`.
+LLM/HUIM là adapter trừu tượng chưa đăng ký; FastKAN/S-KAN chưa được triển khai.
+
+```text
+src/ips/data_access/        CSV, manifest/hash, split và mẫu NumPy dùng chung
+src/ips/dataset.py          biểu diễn tensor riêng cho PyTorch, giữ API cũ
+src/ips/algorithms/         Algorithm ABC, neural wrappers, llm/ và huim/ extension
+src/ips/experiments/        config/result, registry, runner, evaluator và exporter
+configs/experiments/        cấu hình Factory mẫu
+docs/architecture/         hướng dẫn nhóm và sơ đồ phụ thuộc
+tests/test_factory.py      registry, output, split, v1 và CLI tương thích
+```
+
+```powershell
+.\.venv\Scripts\python.exe -m ips algorithms
+.\.venv\Scripts\python.exe -u -m ips run --config configs/experiments/kan_mixer_smoke.json
+# Theo dõi từ terminal khác
+Get-Content runs/factory_kan_mixer_smoke/terminal.log -Tail 20 -Wait
+```
+
+Ví dụ config cho một lượt ngắn:
+
+```json
+{
+  "algorithm_id": "kan_mixer",
+  "params": {"model_config": "configs/base.json"},
+  "split_dir": "data/processed/uji_group_split_v1",
+  "output_dir": "runs/my_factory_kan_smoke",
+  "task": "position",
+  "device": "cpu",
+  "seed": 42,
+  "smoke": true,
+  "evaluation_splits": ["validation"]
+}
+```
+
+Chạy lại phải dùng `output_dir` mới. CLI train/predict/evaluate/check và checkpoint v1 vẫn được giữ.
+Xem [kiến trúc, hợp đồng, phân công và cấu hình đầy đủ](docs/architecture/shared_factory.md),
+[sơ đồ](docs/architecture/shared_factory.png) và [kết quả kiểm chứng refactor](docs/architecture/verification.md).
+Audit tái lập suite lịch sử vẫn yêu cầu đúng mã nguồn đã sinh kết quả; hướng dẫn giữ nguyên kiểm tra hash
+nằm trong tài liệu kiến trúc. Smoke chỉ kiểm tra pipeline, không dùng kết luận về mục tiêu 7–8 m.
+
 ## Cấu trúc
 
 ```text
