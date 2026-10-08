@@ -1,0 +1,19 @@
+flowchart TD
+    P["Khóa giao thức trước chạy<br/>Split, cấu hình, seed, GPU và mục tiêu 8 m"]
+    T["Huấn luyện 9 lượt tuần tự<br/>3 mô hình × 3 seed; tối đa 100 epoch"]
+    V["Validation nội bộ mỗi epoch<br/>Chọn best; early stopping; log RAM/VRAM"]
+    A["Audit đủ 9 lượt hoàn tất<br/>Khóa hash best checkpoint trước test"]
+    E["Đánh giá checkpoint cố định<br/>Validation và toàn bộ 1.111 mẫu test"]
+    B["Benchmark sau training<br/>Batch 1/64; warmup; đồng bộ GPU"]
+    R["Tổng hợp mean và SD theo seed<br/>Bảng chất lượng, thời gian, bộ nhớ"]
+    F["Phân tích nhóm và lỗi lớn<br/>Confusion, CDF, AP count, giới hạn kết luận"]
+    P --> T --> V --> A
+    A --> E --> R
+    A --> B --> R
+    R --> F
+    classDef learn fill:#dcfce7,stroke:#15803d,color:#14532d
+    classDef evaluate fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    classDef analyze fill:#fef3c7,stroke:#b45309,color:#78350f
+    class T,V learn
+    class A,E,B evaluate
+    class R,F analyze

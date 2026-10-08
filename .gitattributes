@@ -8,3 +8,4 @@ reports/** -text
 *.png binary
 *.pdf binary
 *.docx binary
+*.pptx binary

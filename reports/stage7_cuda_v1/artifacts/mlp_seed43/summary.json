@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "run_type": "training",
+  "model": "mlp",
+  "seed": 43,
+  "epochs_completed": 47,
+  "best_epoch": 32,
+  "best_validation_mean_2d": 12.77824674293495,
+  "optimizer_steps": 11797,
+  "trainable_parameters": 142607,
+  "training_seconds": 56.79237889999058,
+  "test_evaluated": false
+}

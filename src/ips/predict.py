@@ -87,6 +87,7 @@ def evaluate(checkpoint_path: Path, split_dir: Path, split: str, output_dir: Pat
     rows, predicted, coordinates = prediction_rows(logits, xy, checkpoint, dataset.indices.numpy())
     metrics = evaluate_predictions(true_classes.numpy(), predicted, dataset.xy_original, coordinates, bundle.classes)
     errors = np.linalg.norm(coordinates - dataset.xy_original, axis=1)
+    detected_aps = dataset.features[:, :, 1].sum(dim=1).numpy().astype(np.int64)
     metrics["per_metadata_group"] = {}
     for name, values in dataset.metadata.items():
         metrics["per_metadata_group"][name] = {str(int(group)): {
@@ -96,15 +97,24 @@ def evaluate(checkpoint_path: Path, split_dir: Path, split: str, output_dir: Pat
     metrics.update({"split": split, "checkpoint": str(checkpoint_path),
                     "checkpoint_sha256": sha256(checkpoint_path), "run_type": checkpoint["run_type"],
                     "seed": checkpoint["seed"], "model": checkpoint["config"]["model"],
+                    "split_manifest_sha256": checkpoint["split_manifest_sha256"],
                     "checkpoint_epoch": checkpoint["epoch"], "test_userid_note":
                     "USERID 0 in official test means unrecorded user; do not interpret as one person."})
     pairs = [(item["building"], item["floor"]) for item in bundle.classes]
     for i, row in enumerate(rows):
         b, f = pairs[int(true_classes[i])]
-        row.extend([b, f, *dataset.xy_original[i].tolist(), float(errors[i])])
+        row.extend([b, f, *dataset.xy_original[i].tolist(), float(errors[i]),
+                    int(dataset.metadata["USERID"][i]), int(dataset.metadata["PHONEID"][i]), int(detected_aps[i])])
+    metrics["per_detected_ap_bin"] = {}
+    for name, lower, upper in [("0", 0, 0), ("1-9", 1, 9), ("10-19", 10, 19),
+                                ("20-29", 20, 29), ("30+", 30, 520)]:
+        mask = (detected_aps >= lower) & (detected_aps <= upper)
+        metrics["per_detected_ap_bin"][name] = {"count": int(mask.sum()),
+            "mean_2d": float(errors[mask].mean()) if mask.any() else None,
+            "joint_accuracy": float((predicted[mask] == true_classes.numpy()[mask]).mean()) if mask.any() else None}
     output_dir.mkdir(parents=True)
     save_json(output_dir / "metrics.json", metrics)
     (output_dir / "predictions.csv").write_bytes(csv_bytes(PREDICTION_HEADER +
-        ["true_building", "true_floor", "true_x", "true_y", "error_2d"], rows))
+        ["true_building", "true_floor", "true_x", "true_y", "error_2d", "USERID", "PHONEID", "detected_aps"], rows))
     print(f"{split}: n={len(dataset)} mean2d={metrics['mean_2d']:.3f} joint_acc={metrics['joint_accuracy']:.4f}")
     return metrics

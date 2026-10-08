@@ -1,0 +1,99 @@
+{
+  "created_utc": "2026-10-07T15:24:40.453137+00:00",
+  "git_head_at_start": "48e85dac2aaf1a1635714836e975322d03b60166",
+  "models": [
+    "mlp",
+    "mlp_mixer",
+    "kan_mixer"
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "device": "cuda",
+  "config": {
+    "model": "mlp",
+    "split_dir": "data/processed/uji_group_split_v1",
+    "architecture_reference": "https://arxiv.org/abs/2503.08939v1",
+    "mlp": {
+      "input_features": 1040,
+      "hidden_widths": [
+        128,
+        64
+      ],
+      "dropout": 0.1
+    },
+    "mixer": {
+      "tokens": 26,
+      "features_per_token": 40,
+      "channels": 64,
+      "blocks": 2,
+      "token_hidden": 32,
+      "channel_hidden": 128,
+      "dropout": 0.1
+    },
+    "kan": {
+      "basis": "B_spline",
+      "grid_size": 5,
+      "spline_order": 3,
+      "base_activation": "SiLU",
+      "enable_standalone_scale_spline": true,
+      "grid_range": [
+        -3,
+        3
+      ],
+      "scale_noise": 0.1,
+      "scale_base": 1.0,
+      "scale_spline": 1.0,
+      "grid_eps": 0.02,
+      "update_grid": false,
+      "extra_regularization_loss_coefficient": 0,
+      "required_diagnostic": "input_distribution_and_out_of_knot_support_fraction_per_KANLinear",
+      "note": "RSSI_variant_design_not_claimed_to_be_Canuto_paper_hyperparameters"
+    },
+    "loss": {
+      "smooth_l1_beta": 1.0,
+      "lambda_xy": 1.0
+    },
+    "training": {
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "batch_size": 64,
+      "max_epochs": 100,
+      "patience": 15,
+      "min_delta": 0.01,
+      "gradient_clip_l2": 1.0,
+      "threads": 4,
+      "kan_diagnostic_batches": 2
+    }
+  },
+  "config_sha256": "0024d331940ac2f60e2fb7c06ba1e80cef92f3b6eadb1d48475418ad758266d4",
+  "training_implementation_sha256": {
+    "src/ips/data.py": "5a97b9ff65091e60c4438c74893a9cc0707569bb95471427502f48a53de53e7a",
+    "src/ips/dataset.py": "3bbbf0eaedea26bbbebaa0de66fbd3af6ae6ad51f42a9379ae5f80ae82d6b26d",
+    "src/ips/train.py": "1b6563088734a5fb4c664ee971f8570980a62932be4ae431e4296821ac7a501a",
+    "src/ips/metrics.py": "22ff613bf906dbb81143e6b4866cfed0656b8ad6d46759984f5ba756af50d106",
+    "src/ips/runtime.py": "5d12628a940ad74f231a878b970dcc6038f8b279f52cf0f7fd21edf492a5e497",
+    "src/ips/resources.py": "7d74c23052061cb057fcbea9ac2a146e9448f7be34bdd4dc40be58d04ced0797",
+    "src/ips/diagnostics.py": "635eba41620b7c4358ebede29f332f8bb34098881da435c29a10c5dc6dbc93c0",
+    "src/ips/models/networks.py": "2d1c2bd4e1e98b8a6670fd50e61d727a9cf3710b717681215fbd91d62a20e059",
+    "src/ips/models/vendor/efficient_kan.py": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7"
+  },
+  "split_manifest_sha256": "0408be903deca1ce397bb0f8ec775a61227cbd5a98b27775cd8569f5fc21b98d",
+  "selection": "internal_validation_mean_2d_with_min_delta_0.01",
+  "target": {
+    "metric": "mean_2d_all_1111_official_test_rows",
+    "maximum_metres": 8
+  },
+  "benchmark": {
+    "batch_sizes": [
+      1,
+      64
+    ],
+    "warmup": 10,
+    "repeats": 100,
+    "scope": "forward_and_in_memory_end_to_end_separately"
+  },
+  "test_policy": "Evaluate nine fixed best-validation checkpoints only after all training passes fairness audit; no retuning on test."
+}

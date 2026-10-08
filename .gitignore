@@ -6,3 +6,5 @@ __pycache__/
 .pytest_cache/
 runs/
 .DS_Store
+# Temporary owner files created when Office documents are open.
+~$*

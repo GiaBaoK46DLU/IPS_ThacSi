@@ -1,0 +1,210 @@
+{
+  "status": "passed",
+  "models": [
+    "mlp",
+    "mlp_mixer",
+    "kan_mixer"
+  ],
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "runs": [
+    {
+      "model": "mlp",
+      "seed": 42,
+      "run": "mlp_seed42",
+      "checkpoint_sha256": "fa16dedb8419ffbe0bf5ce6baf8311d29146d6c1d7534c1eb40d5aacdd04fa5f",
+      "epochs_completed": 36,
+      "best_epoch": 21,
+      "optimizer_steps": 9036
+    },
+    {
+      "model": "mlp",
+      "seed": 43,
+      "run": "mlp_seed43",
+      "checkpoint_sha256": "2d424ef55bfd66b4813562ac5fe211a40bb8f803f5b8703e707c1f2da8f9575e",
+      "epochs_completed": 47,
+      "best_epoch": 32,
+      "optimizer_steps": 11797
+    },
+    {
+      "model": "mlp",
+      "seed": 44,
+      "run": "mlp_seed44",
+      "checkpoint_sha256": "b87c018f8e88d0570b49c2d6308c2e04890b3ab9e757edb13be252452556d835",
+      "epochs_completed": 46,
+      "best_epoch": 31,
+      "optimizer_steps": 11546
+    },
+    {
+      "model": "mlp_mixer",
+      "seed": 42,
+      "run": "mlp_mixer_seed42",
+      "checkpoint_sha256": "745c62c6ac355dd80bd058f4257c41cdbf4ee03a6eb6034c60ff28f8aa6c18ed",
+      "epochs_completed": 52,
+      "best_epoch": 37,
+      "optimizer_steps": 13052
+    },
+    {
+      "model": "mlp_mixer",
+      "seed": 43,
+      "run": "mlp_mixer_seed43",
+      "checkpoint_sha256": "a56f2fbad3c6c9487efeefe903304f635e1da6ce8ef9a39a89da78b27d4ea472",
+      "epochs_completed": 64,
+      "best_epoch": 49,
+      "optimizer_steps": 16064
+    },
+    {
+      "model": "mlp_mixer",
+      "seed": 44,
+      "run": "mlp_mixer_seed44",
+      "checkpoint_sha256": "c7b3030e5f86e9b853fdf183a3ec27356d654f92950924554f0e13f58fbc551f",
+      "epochs_completed": 100,
+      "best_epoch": 100,
+      "optimizer_steps": 25100
+    },
+    {
+      "model": "kan_mixer",
+      "seed": 42,
+      "run": "kan_mixer_seed42",
+      "checkpoint_sha256": "7e9228c4b2aee5fa755b9f22fbce821e286a0e6a38ec0bbcb094f21c0ff2729d",
+      "epochs_completed": 69,
+      "best_epoch": 54,
+      "optimizer_steps": 17319
+    },
+    {
+      "model": "kan_mixer",
+      "seed": 43,
+      "run": "kan_mixer_seed43",
+      "checkpoint_sha256": "b2aaa571e34a607ed1a41d4bc43a57b96db1eabf43e83a3480565c0169fc0362",
+      "epochs_completed": 87,
+      "best_epoch": 72,
+      "optimizer_steps": 21837
+    },
+    {
+      "model": "kan_mixer",
+      "seed": 44,
+      "run": "kan_mixer_seed44",
+      "checkpoint_sha256": "54d5930ced24695740de9df793d90668ffa80d9c0ea8bb13cf67589b287c4156",
+      "epochs_completed": 92,
+      "best_epoch": 77,
+      "optimizer_steps": 23092
+    }
+  ],
+  "split_manifest_sha256": "0408be903deca1ce397bb0f8ec775a61227cbd5a98b27775cd8569f5fc21b98d",
+  "software": {
+    "python": "3.12.1",
+    "torch": "2.9.0+cu128",
+    "numpy": "2.2.6",
+    "scikit_learn": "1.6.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 4060 Ti",
+    "threads": 4
+  },
+  "protocol": {
+    "created_utc": "2026-10-07T15:24:40.453137+00:00",
+    "git_head_at_start": "48e85dac2aaf1a1635714836e975322d03b60166",
+    "models": [
+      "mlp",
+      "mlp_mixer",
+      "kan_mixer"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "device": "cuda",
+    "config": {
+      "model": "mlp",
+      "split_dir": "data/processed/uji_group_split_v1",
+      "architecture_reference": "https://arxiv.org/abs/2503.08939v1",
+      "mlp": {
+        "input_features": 1040,
+        "hidden_widths": [
+          128,
+          64
+        ],
+        "dropout": 0.1
+      },
+      "mixer": {
+        "tokens": 26,
+        "features_per_token": 40,
+        "channels": 64,
+        "blocks": 2,
+        "token_hidden": 32,
+        "channel_hidden": 128,
+        "dropout": 0.1
+      },
+      "kan": {
+        "basis": "B_spline",
+        "grid_size": 5,
+        "spline_order": 3,
+        "base_activation": "SiLU",
+        "enable_standalone_scale_spline": true,
+        "grid_range": [
+          -3,
+          3
+        ],
+        "scale_noise": 0.1,
+        "scale_base": 1.0,
+        "scale_spline": 1.0,
+        "grid_eps": 0.02,
+        "update_grid": false,
+        "extra_regularization_loss_coefficient": 0,
+        "required_diagnostic": "input_distribution_and_out_of_knot_support_fraction_per_KANLinear",
+        "note": "RSSI_variant_design_not_claimed_to_be_Canuto_paper_hyperparameters"
+      },
+      "loss": {
+        "smooth_l1_beta": 1.0,
+        "lambda_xy": 1.0
+      },
+      "training": {
+        "learning_rate": 0.001,
+        "weight_decay": 0.0001,
+        "batch_size": 64,
+        "max_epochs": 100,
+        "patience": 15,
+        "min_delta": 0.01,
+        "gradient_clip_l2": 1.0,
+        "threads": 4,
+        "kan_diagnostic_batches": 2
+      }
+    },
+    "config_sha256": "0024d331940ac2f60e2fb7c06ba1e80cef92f3b6eadb1d48475418ad758266d4",
+    "training_implementation_sha256": {
+      "src/ips/data.py": "5a97b9ff65091e60c4438c74893a9cc0707569bb95471427502f48a53de53e7a",
+      "src/ips/dataset.py": "3bbbf0eaedea26bbbebaa0de66fbd3af6ae6ad51f42a9379ae5f80ae82d6b26d",
+      "src/ips/train.py": "1b6563088734a5fb4c664ee971f8570980a62932be4ae431e4296821ac7a501a",
+      "src/ips/metrics.py": "22ff613bf906dbb81143e6b4866cfed0656b8ad6d46759984f5ba756af50d106",
+      "src/ips/runtime.py": "5d12628a940ad74f231a878b970dcc6038f8b279f52cf0f7fd21edf492a5e497",
+      "src/ips/resources.py": "7d74c23052061cb057fcbea9ac2a146e9448f7be34bdd4dc40be58d04ced0797",
+      "src/ips/diagnostics.py": "635eba41620b7c4358ebede29f332f8bb34098881da435c29a10c5dc6dbc93c0",
+      "src/ips/models/networks.py": "2d1c2bd4e1e98b8a6670fd50e61d727a9cf3710b717681215fbd91d62a20e059",
+      "src/ips/models/vendor/efficient_kan.py": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7"
+    },
+    "split_manifest_sha256": "0408be903deca1ce397bb0f8ec775a61227cbd5a98b27775cd8569f5fc21b98d",
+    "selection": "internal_validation_mean_2d_with_min_delta_0.01",
+    "target": {
+      "metric": "mean_2d_all_1111_official_test_rows",
+      "maximum_metres": 8
+    },
+    "benchmark": {
+      "batch_sizes": [
+        1,
+        64
+      ],
+      "warmup": 10,
+      "repeats": 100,
+      "scope": "forward_and_in_memory_end_to_end_separately"
+    },
+    "test_policy": "Evaluate nine fixed best-validation checkpoints only after all training passes fairness audit; no retuning on test."
+  },
+  "limitations": [
+    "Equal maximum epochs and stopping rule, not equal actual steps/FLOPs or parameter counts.",
+    "Proxy measurement groups; not a guarantee of unseen users, locations or devices."
+  ]
+}

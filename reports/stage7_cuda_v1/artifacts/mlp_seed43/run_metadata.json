@@ -1,0 +1,275 @@
+{
+  "run_type": "training",
+  "seed": 43,
+  "config": {
+    "model": "mlp",
+    "split_dir": "data/processed/uji_group_split_v1",
+    "architecture_reference": "https://arxiv.org/abs/2503.08939v1",
+    "mlp": {
+      "input_features": 1040,
+      "hidden_widths": [
+        128,
+        64
+      ],
+      "dropout": 0.1
+    },
+    "mixer": {
+      "tokens": 26,
+      "features_per_token": 40,
+      "channels": 64,
+      "blocks": 2,
+      "token_hidden": 32,
+      "channel_hidden": 128,
+      "dropout": 0.1
+    },
+    "kan": {
+      "basis": "B_spline",
+      "grid_size": 5,
+      "spline_order": 3,
+      "base_activation": "SiLU",
+      "enable_standalone_scale_spline": true,
+      "grid_range": [
+        -3,
+        3
+      ],
+      "scale_noise": 0.1,
+      "scale_base": 1.0,
+      "scale_spline": 1.0,
+      "grid_eps": 0.02,
+      "update_grid": false,
+      "extra_regularization_loss_coefficient": 0,
+      "required_diagnostic": "input_distribution_and_out_of_knot_support_fraction_per_KANLinear",
+      "note": "RSSI_variant_design_not_claimed_to_be_Canuto_paper_hyperparameters"
+    },
+    "loss": {
+      "smooth_l1_beta": 1.0,
+      "lambda_xy": 1.0
+    },
+    "training": {
+      "learning_rate": 0.001,
+      "weight_decay": 0.0001,
+      "batch_size": 64,
+      "max_epochs": 100,
+      "patience": 15,
+      "min_delta": 0.01,
+      "gradient_clip_l2": 1.0,
+      "threads": 4,
+      "kan_diagnostic_batches": 2
+    }
+  },
+  "resolved_max_epochs": 100,
+  "actual_counts": {
+    "train": 16025,
+    "validation": 3912
+  },
+  "trainable_parameters": 142607,
+  "software": {
+    "python": "3.12.1",
+    "torch": "2.9.0+cu128",
+    "numpy": "2.2.6",
+    "scikit_learn": "1.6.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 4060 Ti",
+    "threads": 4
+  },
+  "split_manifest_sha256": "0408be903deca1ce397bb0f8ec775a61227cbd5a98b27775cd8569f5fc21b98d",
+  "split_manifest": {
+    "protocol": "uji_group_split_v1",
+    "status": "materialized_and_checked_not_trained",
+    "sources": {
+      "development": {
+        "path": "data/raw/ujiindoorloc/trainingData.csv",
+        "sha256": "45ca0128bd12019c976bb4793e407c979c82995d7a5940ab7288620247905168",
+        "rows": 19937
+      },
+      "final_test": {
+        "path": "data/raw/ujiindoorloc/validationData.csv",
+        "sha256": "5f90c536648cd657b2c516d20c4e0968d4003279ea6bd5d5d5322d3f1e8905c0",
+        "rows": 1111
+      }
+    },
+    "design_path": "docs/lessons/chang_04/experiment_design.json",
+    "design_sha256": "eec43af2f265a924c1778b1afdba18d9bf5d8a2e619db670ac22a5f56a3ba637",
+    "software": {
+      "python": "3.12.1",
+      "numpy": "2.2.6",
+      "scikit_learn": "1.6.1"
+    },
+    "group_encoding": "numeric tuple in group_key_columns order; sorted unique tuples; zero-based IDs",
+    "split_settings": {
+      "method": "StratifiedGroupKFold",
+      "n_splits": 5,
+      "shuffle": true,
+      "random_state": 2026,
+      "validation_fold_index": 0,
+      "stratification_target": "joint_building_floor",
+      "group_key_columns": [
+        "USERID",
+        "PHONEID",
+        "BUILDINGID",
+        "FLOOR",
+        "LONGITUDE",
+        "LATITUDE",
+        "SPACEID",
+        "RELATIVEPOSITION"
+      ],
+      "required_checks": [
+        "group_disjointness",
+        "all_13_classes_in_train_and_validation",
+        "duplicate_audit",
+        "saved_original_row_indices",
+        "csv_hashes"
+      ],
+      "interpretation": "heldout_measurement_groups_not_strictly_unseen_users_or_locations"
+    },
+    "counts": {
+      "train": 16025,
+      "validation": 3912,
+      "test": 1111
+    },
+    "group_counts": {
+      "development": 1801,
+      "train": 1442,
+      "validation": 359,
+      "train_validation_overlap": 0
+    },
+    "class_counts": {
+      "train": {
+        "0_0": 858,
+        "0_1": 1122,
+        "0_2": 1124,
+        "0_3": 1115,
+        "1_0": 1121,
+        "1_1": 1214,
+        "1_2": 1114,
+        "1_3": 674,
+        "2_0": 1576,
+        "2_1": 1743,
+        "2_2": 1299,
+        "2_3": 2183,
+        "2_4": 882
+      },
+      "validation": {
+        "0_0": 201,
+        "0_1": 234,
+        "0_2": 319,
+        "0_3": 276,
+        "1_0": 247,
+        "1_1": 270,
+        "1_2": 282,
+        "1_3": 274,
+        "2_0": 366,
+        "2_1": 419,
+        "2_2": 278,
+        "2_3": 526,
+        "2_4": 220
+      },
+      "test": {
+        "0_0": 78,
+        "0_1": 208,
+        "0_2": 165,
+        "0_3": 85,
+        "1_0": 30,
+        "1_1": 143,
+        "1_2": 87,
+        "1_3": 47,
+        "2_0": 24,
+        "2_1": 111,
+        "2_2": 54,
+        "2_3": 40,
+        "2_4": 39
+      }
+    },
+    "internal_train_validation_overlap": {
+      "full_distinct_keys": 0,
+      "rssi_distinct_keys": 13,
+      "classification_rssi_distinct_keys": 14,
+      "labeled_rssi_distinct_keys": 0,
+      "location_distinct_keys": 268
+    },
+    "original_development_final_test_overlap": {
+      "full_distinct_keys": 0,
+      "rssi_distinct_keys": 0,
+      "classification_rssi_distinct_keys": 0,
+      "labeled_rssi_distinct_keys": 0,
+      "location_distinct_keys": 10
+    },
+    "all_undetected_rows": {
+      "train": 61,
+      "validation": 15,
+      "test": 0
+    },
+    "limitations": [
+      "group is a proxy, not an official acquisition session",
+      "users/devices/spatial locations may overlap internal train and validation",
+      "equal RSSI with the same building-floor but different xy can cross internal split",
+      "test USERID=0 is not evidence of one physical person"
+    ],
+    "artifact_sha256": {
+      "train_indices.csv": "58688e2fc5c723178834e59d919d4b91694c37512e7eea9244fcacdda6f45b88",
+      "validation_indices.csv": "0e2cf359afc089836dda98cff802bb35c886b1c53c132dbaa5c43526af425a58",
+      "test_indices.csv": "59160813d41758ccb781e9cacca74cd36e9a72d0d5928e3c5f7cecf6b3a02fca",
+      "ap_order.json": "35483807c243d70a477137ed5417a858296e6e85a9fd69e958f51d069614ab55",
+      "class_mapping.json": "b1a08856f199fe859cf099c4c320862268d1155660a139f34ced3a92955652f8",
+      "preprocessing.json": "42a147cd23e7e5fec1d82a7936c8cbe0b6db816e9b3e6b228165e3f63f822d74",
+      "split_label_distribution.csv": "6b476126c78f8617d241426e3268b3f4c36fa8b05b1060a420546f64523d4420"
+    },
+    "generator_sha256": {
+      "data_utils.py": "052269913bab03f70e67f939d5d5f62e5b1f9c7b6cd569214b8d1257ae780233",
+      "make_splits.py": "3d9040f1555f0f31e76cdd6742f7ae5fa48493cbb9f2848e209f670446d7833a"
+    },
+    "shared_reader": {
+      "path": "src/ips/data.py",
+      "sha256": "5a97b9ff65091e60c4438c74893a9cc0707569bb95471427502f48a53de53e7a"
+    },
+    "row_index_convention": "zero-based data rows excluding header; csv_line_number=row_index+2",
+    "test_group_id": "empty: official test not generated by internal group splitter",
+    "model_results": null
+  },
+  "code_sha256": {
+    "src/ips/__init__.py": "3c3cf6fa50437844a66a910a091e28f5950864a625e1ef0d3fd345868bedd3c2",
+    "src/ips/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "src/ips/cli.py": "7276dc7b340818a091c97ca1abbb401530b088b5a531a0905862d2058bbafaf8",
+    "src/ips/data.py": "5a97b9ff65091e60c4438c74893a9cc0707569bb95471427502f48a53de53e7a",
+    "src/ips/dataset.py": "3bbbf0eaedea26bbbebaa0de66fbd3af6ae6ad51f42a9379ae5f80ae82d6b26d",
+    "src/ips/diagnostics.py": "635eba41620b7c4358ebede29f332f8bb34098881da435c29a10c5dc6dbc93c0",
+    "src/ips/metrics.py": "22ff613bf906dbb81143e6b4866cfed0656b8ad6d46759984f5ba756af50d106",
+    "src/ips/models/__init__.py": "956eb4ddcf1af8bdf2f16e2f87c1e7562338a349e0a6cd39f21791d02c76a7a7",
+    "src/ips/models/networks.py": "2d1c2bd4e1e98b8a6670fd50e61d727a9cf3710b717681215fbd91d62a20e059",
+    "src/ips/models/vendor/__init__.py": "32559b1a85c98de0321c24e6741700948b419bdc7691133d388d348b5dd32c31",
+    "src/ips/models/vendor/efficient_kan.py": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7",
+    "src/ips/predict.py": "3ee255e2626b23ebc8e30320d902d9c533de1a5f2b7504e051fd74b370c9a936",
+    "src/ips/resources.py": "7d74c23052061cb057fcbea9ac2a146e9448f7be34bdd4dc40be58d04ced0797",
+    "src/ips/runtime.py": "5d12628a940ad74f231a878b970dcc6038f8b279f52cf0f7fd21edf492a5e497",
+    "src/ips/train.py": "1b6563088734a5fb4c664ee971f8570980a62932be4ae431e4296821ac7a501a"
+  },
+  "training_implementation_sha256": {
+    "src/ips/data.py": "5a97b9ff65091e60c4438c74893a9cc0707569bb95471427502f48a53de53e7a",
+    "src/ips/dataset.py": "3bbbf0eaedea26bbbebaa0de66fbd3af6ae6ad51f42a9379ae5f80ae82d6b26d",
+    "src/ips/train.py": "1b6563088734a5fb4c664ee971f8570980a62932be4ae431e4296821ac7a501a",
+    "src/ips/metrics.py": "22ff613bf906dbb81143e6b4866cfed0656b8ad6d46759984f5ba756af50d106",
+    "src/ips/runtime.py": "5d12628a940ad74f231a878b970dcc6038f8b279f52cf0f7fd21edf492a5e497",
+    "src/ips/resources.py": "7d74c23052061cb057fcbea9ac2a146e9448f7be34bdd4dc40be58d04ced0797",
+    "src/ips/diagnostics.py": "635eba41620b7c4358ebede29f332f8bb34098881da435c29a10c5dc6dbc93c0",
+    "src/ips/models/networks.py": "2d1c2bd4e1e98b8a6670fd50e61d727a9cf3710b717681215fbd91d62a20e059",
+    "src/ips/models/vendor/efficient_kan.py": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7"
+  },
+  "kan_source": {
+    "repository": "https://github.com/Blealtan/efficient-kan",
+    "commit": "7b6ce1c87f18c8bc90c208f6b494042344216b11",
+    "files": {
+      "efficient_kan.py": {
+        "url": "https://raw.githubusercontent.com/Blealtan/efficient-kan/7b6ce1c87f18c8bc90c208f6b494042344216b11/src/efficient_kan/kan.py",
+        "sha256": "c2b984359fe483640fcc2313570bbbd2128eede99bdbf0fa586ec8e0e1a1ecb7"
+      },
+      "LICENSE.efficient-kan": {
+        "url": "https://raw.githubusercontent.com/Blealtan/efficient-kan/7b6ce1c87f18c8bc90c208f6b494042344216b11/LICENSE",
+        "sha256": "09c34a5fa51d62153d52c2870d0a4491a1d84b980000863a8b9d055adf7e45fc"
+      }
+    },
+    "modifications": "none; original bytes retained"
+  },
+  "selection": "internal_validation_mean_2d",
+  "test_evaluated_during_training": false
+}

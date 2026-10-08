@@ -1,0 +1,36 @@
+validation: n=3912 mean2d=13.551 joint_acc=0.9831
+test: n=1111 mean2d=16.292 joint_acc=0.9109
+BENCHMARK mlp seed=42 batch=1: forward p50=0.253ms, end_to_end p50=0.464ms
+BENCHMARK mlp seed=42 batch=64: forward p50=0.265ms, end_to_end p50=0.606ms
+validation: n=3912 mean2d=12.778 joint_acc=0.9829
+test: n=1111 mean2d=15.625 joint_acc=0.9064
+BENCHMARK mlp seed=43 batch=1: forward p50=0.257ms, end_to_end p50=0.458ms
+BENCHMARK mlp seed=43 batch=64: forward p50=0.275ms, end_to_end p50=0.610ms
+validation: n=3912 mean2d=12.322 joint_acc=0.9808
+test: n=1111 mean2d=15.484 joint_acc=0.9118
+BENCHMARK mlp seed=44 batch=1: forward p50=0.255ms, end_to_end p50=0.465ms
+BENCHMARK mlp seed=44 batch=64: forward p50=0.280ms, end_to_end p50=0.610ms
+validation: n=3912 mean2d=13.181 joint_acc=0.9852
+test: n=1111 mean2d=17.278 joint_acc=0.9271
+BENCHMARK mlp_mixer seed=42 batch=1: forward p50=0.918ms, end_to_end p50=1.237ms
+BENCHMARK mlp_mixer seed=42 batch=64: forward p50=0.869ms, end_to_end p50=1.253ms
+validation: n=3912 mean2d=13.069 joint_acc=0.9862
+test: n=1111 mean2d=15.500 joint_acc=0.9082
+BENCHMARK mlp_mixer seed=43 batch=1: forward p50=0.907ms, end_to_end p50=1.163ms
+BENCHMARK mlp_mixer seed=43 batch=64: forward p50=0.867ms, end_to_end p50=1.247ms
+validation: n=3912 mean2d=11.672 joint_acc=0.9796
+test: n=1111 mean2d=13.777 joint_acc=0.9415
+BENCHMARK mlp_mixer seed=44 batch=1: forward p50=0.913ms, end_to_end p50=1.184ms
+BENCHMARK mlp_mixer seed=44 batch=64: forward p50=0.890ms, end_to_end p50=1.287ms
+validation: n=3912 mean2d=12.349 joint_acc=0.9831
+test: n=1111 mean2d=16.047 joint_acc=0.9118
+BENCHMARK kan_mixer seed=42 batch=1: forward p50=4.493ms, end_to_end p50=5.004ms
+BENCHMARK kan_mixer seed=42 batch=64: forward p50=4.531ms, end_to_end p50=5.039ms
+validation: n=3912 mean2d=12.376 joint_acc=0.9760
+test: n=1111 mean2d=17.050 joint_acc=0.9037
+BENCHMARK kan_mixer seed=43 batch=1: forward p50=4.524ms, end_to_end p50=4.942ms
+BENCHMARK kan_mixer seed=43 batch=64: forward p50=4.448ms, end_to_end p50=4.956ms
+validation: n=3912 mean2d=12.026 joint_acc=0.9872
+test: n=1111 mean2d=14.082 joint_acc=0.9055
+BENCHMARK kan_mixer seed=44 batch=1: forward p50=4.619ms, end_to_end p50=4.915ms
+BENCHMARK kan_mixer seed=44 batch=64: forward p50=4.447ms, end_to_end p50=5.016ms

@@ -38,6 +38,17 @@ def main(argv=None):
     evaluation.add_argument("--split", choices=["validation", "test"], default="validation")
     evaluation.add_argument("--output-dir", type=Path, required=True)
     evaluation.add_argument("--device", default="auto")
+    benchmark_parser = commands.add_parser("benchmark", help="Inference latency and memory on fixed RSSI inputs")
+    benchmark_parser.add_argument("--checkpoint", type=Path, required=True)
+    benchmark_parser.add_argument("--csv", type=Path, required=True)
+    benchmark_parser.add_argument("--output", type=Path, required=True)
+    benchmark_parser.add_argument("--batch-size", type=int, default=1)
+    benchmark_parser.add_argument("--warmup", type=int, default=10)
+    benchmark_parser.add_argument("--repeats", type=int, default=100)
+    benchmark_parser.add_argument("--device", default="cuda")
+    report_parser = commands.add_parser("report", help="Audit and summarize a completed nine-run stage-7 suite")
+    report_parser.add_argument("--experiment-root", type=Path, required=True)
+    report_parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "prepare":
         scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py", "make_splits.py", "verify_splits.py"]
@@ -73,6 +84,12 @@ def main(argv=None):
     elif args.command == "evaluate":
         from .predict import evaluate
         evaluate(args.checkpoint, args.split_dir, args.split, args.output_dir, args.device)
+    elif args.command == "benchmark":
+        from .benchmark import benchmark
+        benchmark(args.checkpoint, args.csv, args.output, args.batch_size, args.warmup, args.repeats, args.device)
+    elif args.command == "report":
+        from .analysis import report
+        report(args.experiment_root, args.output_dir)
 
 
 if __name__ == "__main__":
