@@ -5,6 +5,35 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 runs/
+/build/
+/dist/
+*.whl
 .DS_Store
 # Temporary owner files created when Office documents are open.
 ~$*
+
+# Personal baseline study and archives: kept locally.
+/personal_learning/
+# Guard former personal paths if historical files are restored manually.
+/configs/base.json
+/configs/experiments/mlp_smoke.json
+/configs/experiments/mlp_mixer_smoke.json
+/docs/lessons/chang_02/
+/docs/lessons/chang_04/
+/docs/lessons/chang_06/
+/docs/lessons/chang_07/
+/docs/lessons/chang_08/
+/references/course_materials/
+/reports/
+/src/ips/analysis.py
+/tests/test_evaluation.py
+/scripts/run_experiment.ps1
+/scripts/profile_gpu.ps1
+/scripts/summarize_gpu_profile.py
+/scripts/train_stage7.py
+/scripts/run_stage7.ps1
+/scripts/evaluate_stage7.py
+/scripts/evaluate_stage7.ps1
+/scripts/build_stage8.cjs
+/scripts/render_stage8.ps1
+/docs/architecture/verification.md
