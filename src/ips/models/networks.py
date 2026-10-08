@@ -19,28 +19,7 @@ class PositionHeads(nn.Module):
                 "xy": self.coordinates(representation)}
 
 
-class MLPBaseline(nn.Module):
-    def __init__(self, settings: dict, classes: int):
-        super().__init__()
-        width = settings["input_features"]
-        layers = []
-        for hidden in settings["hidden_widths"]:
-            layers.extend([nn.Linear(width, hidden), nn.GELU(), nn.Dropout(settings["dropout"])])
-            width = hidden
-        layers.append(nn.LayerNorm(width))
-        self.backbone = nn.Sequential(*layers)
-        self.heads = PositionHeads(width, classes)
-
-    def forward(self, features):
-        if features.ndim != 3 or features.shape[1:] != (520, 2):
-            raise ValueError("Expected input [B,520,2] in AP order (z,mask).")
-        return self.heads(self.backbone(features.flatten(start_dim=1)))
-
-
-def mixing_branch(width: int, hidden: int, dropout: float, kan: dict | None):
-    if kan is None:
-        return nn.Sequential(nn.Linear(width, hidden), nn.GELU(), nn.Dropout(dropout),
-                             nn.Linear(hidden, width), nn.Dropout(dropout))
+def mixing_branch(width: int, hidden: int, dropout: float, kan: dict):
     options = {key: kan[key] for key in ["grid_size", "spline_order", "scale_noise", "scale_base",
                 "scale_spline", "enable_standalone_scale_spline", "grid_eps", "grid_range"]}
     # KANLinear đã có base SiLU và spline học được. Không chèn GELU giữa hai KAN.
@@ -50,7 +29,7 @@ def mixing_branch(width: int, hidden: int, dropout: float, kan: dict | None):
 
 class MixerBlock(nn.Module):
     def __init__(self, tokens: int, channels: int, token_hidden: int,
-                 channel_hidden: int, dropout: float, kan: dict | None):
+                 channel_hidden: int, dropout: float, kan: dict):
         super().__init__()
         self.token_norm = nn.LayerNorm(channels)
         self.token_mixer = mixing_branch(tokens, token_hidden, dropout, kan)
@@ -66,7 +45,7 @@ class MixerBlock(nn.Module):
 
 
 class RSSIMixer(nn.Module):
-    def __init__(self, settings: dict, classes: int, kan: dict | None = None):
+    def __init__(self, settings: dict, classes: int, kan: dict):
         super().__init__()
         self.tokens = settings["tokens"]
         self.features_per_token = settings["features_per_token"]
@@ -89,10 +68,17 @@ class RSSIMixer(nn.Module):
 
 def build_model(config: dict, classes: int = 13) -> nn.Module:
     name = config["model"]
-    if name == "mlp":
-        return MLPBaseline(config["mlp"], classes)
-    if name == "mlp_mixer":
-        return RSSIMixer(config["mixer"], classes)
+    if name in ("mlp", "mlp_mixer"):
+        # Optional local study code, excluded from the shared repository.
+        from importlib.util import module_from_spec, spec_from_file_location
+        from ..data import ROOT
+        path = ROOT/"personal_learning/legacy_models.py"
+        if not path.is_file():
+            raise ValueError("Personal MLP baselines are excluded from this shared project; choose kan_mixer.")
+        spec = spec_from_file_location("ips_personal_legacy_models", path)
+        module = module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.build_model(config, classes)
     if name == "kan_mixer":
         if config["kan"]["base_activation"] != "SiLU":
             raise ValueError("Pinned IPS protocol uses the efficient-kan SiLU base activation.")

@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -23,15 +24,23 @@ class PipelineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         configure_runtime(42, "cpu", 2)
-        cls.config = read_config(ROOT / "configs/base.json")
+        cls.config = read_config(ROOT / "configs/kan_mixer.json")
 
     def test_missing_and_weak_signal_remain_distinct(self):
         result = feature_transform(np.asarray([[-52, 100, -104, 0]], dtype=np.int16))
         np.testing.assert_array_equal(result, [[[0.5, 1], [0, 0], [0, 1], [1, 1]]])
 
+    def test_kan_does_not_require_personal_baselines_or_mlp_config(self):
+        self.assertNotIn("mlp", self.config)
+        with tempfile.TemporaryDirectory() as tmp, patch("ips.data.ROOT", Path(tmp)):
+            self.assertEqual(parameter_count(build_model(self.config)), 365199)
+            for name in ("mlp", "mlp_mixer"):
+                with self.assertRaisesRegex(ValueError, "Personal MLP baselines are excluded"):
+                    build_model({"model": name})
+
     def test_token_and_channel_axes_with_hand_computed_permutations(self):
         x = torch.tensor([[[1., 10.], [2., 20.], [3., 30.]]])
-        block = MixerBlock(3, 2, 3, 2, 0, None)
+        block = MixerBlock(3, 2, 3, 2, 0, self.config["kan"])
         block.token_norm = block.channel_norm = nn.Identity()
         token = nn.Linear(3, 3, bias=False)
         token.weight.data.copy_(torch.tensor([[0.,0.,1.],[1.,0.,0.],[0.,1.,0.]]))
@@ -44,8 +53,8 @@ class PipelineTests(unittest.TestCase):
         channel.weight.data.copy_(torch.tensor([[0.,1.],[1.,0.]]))
         torch.testing.assert_close(block(x), torch.tensor([[[11.,11.],[22.,22.],[33.,33.]]]))
 
-    def test_all_models_loss_gradients_and_design_parameter_counts(self):
-        expected_counts = {"mlp":142607, "mlp_mixer":40835, "kan_mixer":365199}
+    def test_kan_model_loss_gradients_and_design_parameter_count(self):
+        expected_counts = {"kan_mixer":365199}
         x = torch.rand(2, 520, 2)
         for name, expected in expected_counts.items():
             with self.subTest(model=name):
@@ -82,10 +91,10 @@ class PipelineTests(unittest.TestCase):
         self.assertAlmostEqual(metrics["rmse_2d"], 5.0)
         self.assertEqual(metrics["mae_xy"], [3.,4.])
 
-    def test_checkpoint_round_trip_all_backbones(self):
+    def test_checkpoint_round_trip_kan_backbone(self):
         x = torch.rand(2,520,2)
         with tempfile.TemporaryDirectory(prefix="ips_checkpoint_") as tmp:
-            for name in ["mlp","mlp_mixer","kan_mixer"]:
+            for name in ["kan_mixer"]:
                 config=copy.deepcopy(self.config); config["model"]=name
                 original=build_model(config).eval()
                 payload={"format_version":1,"config":config,"classes":[{}]*13,

@@ -1,12 +1,16 @@
 {
   "algorithm_id": "kan_mixer",
-  "params": {"model_config": "configs/base.json"},
+  "params": {
+    "model_config": "configs/kan_mixer.json"
+  },
   "split_dir": "data/processed/uji_group_split_v1",
   "task": "position",
   "seed": 42,
   "device": "cpu",
   "smoke": true,
-  "evaluation_splits": ["validation"],
+  "evaluation_splits": [
+    "validation"
+  ],
   "export_plots": true,
-  "output_dir": "runs/factory_kan_mixer_smoke"
+  "output_dir": "runs/shared_kan_mixer_smoke"
 }

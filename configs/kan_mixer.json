@@ -2,14 +2,6 @@
   "model": "kan_mixer",
   "split_dir": "data/processed/uji_group_split_v1",
   "architecture_reference": "https://arxiv.org/abs/2503.08939v1",
-  "mlp": {
-    "input_features": 1040,
-    "hidden_widths": [
-      128,
-      64
-    ],
-    "dropout": 0.1
-  },
   "mixer": {
     "tokens": 26,
     "features_per_token": 40,

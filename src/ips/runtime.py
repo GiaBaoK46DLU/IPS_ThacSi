@@ -34,7 +34,7 @@ def configure_runtime(seed: int, device: str, threads: int = 4):
 
 def read_config(path: Path) -> dict:
     config = json.loads(path.read_text(encoding="utf-8"))
-    required = {"model", "split_dir", "mlp", "mixer", "kan", "loss", "training"}
+    required = {"model", "split_dir", "mixer", "kan", "loss", "training"}
     if not required.issubset(config):
         raise ValueError(f"Config lacks: {sorted(required - set(config))}")
     train = config["training"]

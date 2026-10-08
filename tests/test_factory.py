@@ -17,7 +17,7 @@ import torch
 from ips.algorithms.base import Algorithm
 from ips.algorithms.huim.adapter import HUIMAlgorithm
 from ips.algorithms.llm.adapter import LLMAlgorithm
-from ips.algorithms.neural import KANMixerAlgorithm, MLPAlgorithm, MLPMixerAlgorithm, NeuralAlgorithm
+from ips.algorithms.kan_mixer import KANMixerAlgorithm
 from ips.cli import main
 from ips.data import AP_COLUMNS, OUTPUT, ROOT, feature_transform, json_bytes, sha256
 from ips.data_access import FingerprintInputs, FingerprintSplit, load_bundle
@@ -69,9 +69,9 @@ class FactoryTests(unittest.TestCase):
 
     def test_registry_creates_only_implemented_algorithms(self):
         factory = default_factory()
-        self.assertEqual(factory.available_ids(), ("kan_mixer", "mlp", "mlp_mixer"))
-        for name, implementation in (("kan_mixer", KANMixerAlgorithm), ("mlp", MLPAlgorithm),
-                                     ("mlp_mixer", MLPMixerAlgorithm)):
+        self.assertEqual(factory.available_ids(), ("kan_mixer",))
+        self.assertEqual(KANMixerAlgorithm.__bases__, (Algorithm,))
+        for name, implementation in (("kan_mixer", KANMixerAlgorithm),):
             algorithm = factory.create(name, self.config(name))
             self.assertIsInstance(algorithm, implementation)
             self.assertIsInstance(algorithm, Algorithm)
@@ -82,13 +82,16 @@ class FactoryTests(unittest.TestCase):
         with self.assertRaisesRegex(UnknownAlgorithmError, "Unregistered.*Available"):
             factory.create("typo", self.config("typo"))
         with self.assertRaisesRegex(ValueError, "differs"):
-            factory.create("mlp", self.config())
+            factory.create("another_id", self.config())
+        for name in ("mlp", "mlp_mixer"):
+            with self.assertRaisesRegex(UnknownAlgorithmError, "personal study"):
+                factory.create(name, self.config(name))
 
     def test_registry_rejects_duplicates_modules_and_abstract_adapters(self):
         factory = default_factory()
         with self.assertRaisesRegex(ValueError, "already registered"):
-            factory.register("mlp", MLPAlgorithm)
-        for implementation in (Algorithm, NeuralAlgorithm, LLMAlgorithm, HUIMAlgorithm, torch.nn.Linear):
+            factory.register("kan_mixer", KANMixerAlgorithm)
+        for implementation in (Algorithm, LLMAlgorithm, HUIMAlgorithm, torch.nn.Linear):
             with self.assertRaises(TypeError):
                 factory.register("invalid", implementation)
 
@@ -244,8 +247,7 @@ class FactoryTests(unittest.TestCase):
             self.assertFalse(config.output_dir.exists())
 
     def test_checkpoint_v1_fixture_is_loaded_by_algorithm_with_identical_predictions(self):
-        settings = read_config(ROOT/"configs/base.json")
-        settings["model"] = "mlp"
+        settings = read_config(ROOT/"configs/kan_mixer.json")
         model = build_model(settings, len(self.bundle.classes)).eval()
         info = self.train.info
         with tempfile.TemporaryDirectory() as tmp:
@@ -253,7 +255,7 @@ class FactoryTests(unittest.TestCase):
             torch.save({"format_version": 1, "config": settings, "model_state_dict": model.state_dict(),
                         "run_type": "training", "preprocessing": info.preprocessing, "classes": info.classes,
                         "ap_order": info.ap_order, "split_manifest_sha256": sha256(OUTPUT/"manifest.json")}, path)
-            algorithm = default_factory().create("mlp", self.config("mlp", params={"checkpoint": str(path)}))
+            algorithm = default_factory().create("kan_mixer", self.config(params={"checkpoint": str(path)}))
             algorithm.prepare(self.train)
             self.assertTrue(algorithm.execute(self.validation).finalized)
             prediction = algorithm.predict(self.validation.inputs).validate(self.validation.inputs, info.classes)
@@ -261,6 +263,9 @@ class FactoryTests(unittest.TestCase):
                 output = model(FingerprintDataset.from_split(self.validation).features)
             np.testing.assert_array_equal(prediction.class_ids, output["logits"].argmax(dim=1).numpy())
             np.testing.assert_allclose(prediction.xy, inverse_xy(output["xy"].numpy(), info.preprocessing), atol=1e-6)
+            payload = torch.load(path, weights_only=True)
+            payload["ap_order"] = list(reversed(info.ap_order))
+            torch.save(payload, path)
             wrong = default_factory().create("kan_mixer", self.config(params={"checkpoint": str(path)}))
             wrong.prepare(self.train)
             with self.assertRaisesRegex(ValueError, "Checkpoint algorithm"):
@@ -268,8 +273,8 @@ class FactoryTests(unittest.TestCase):
 
     def test_legacy_cli_preserves_train_predict_evaluate_and_check_options(self):
         with patch("ips.train.train") as training:
-            main(["train", "--model", "mlp", "--device", "cpu", "--epochs", "1", "--smoke", "--run-dir", "runs/unit"])
-            self.assertEqual(training.call_args.args[0]["model"], "mlp")
+            main(["train", "--device", "cpu", "--epochs", "1", "--smoke", "--run-dir", "runs/unit"])
+            self.assertEqual(training.call_args.args[0]["model"], "kan_mixer")
             self.assertEqual(training.call_args.args[-2:], (1, True))
         with patch("ips.predict.predict") as prediction:
             main(["predict", "--checkpoint", "v1.pt", "--csv", "data.csv", "--output", "pred.csv", "--device", "cpu"])
@@ -280,6 +285,13 @@ class FactoryTests(unittest.TestCase):
         with patch("sys.stdout", new=io.StringIO()) as output:
             main(["check", "--device", "cpu"])
             self.assertIn("PASS: data integrity and forward shapes", output.getvalue())
+            self.assertNotIn("mlp", output.getvalue())
+        with patch("sys.stdout", new=io.StringIO()) as output:
+            main(["algorithms"])
+            self.assertIn("Implemented: kan_mixer", output.getvalue())
+            self.assertNotIn("mlp", output.getvalue())
+        with patch("sys.stderr", new=io.StringIO()), self.assertRaises(SystemExit):
+            main(["train", "--model", "mlp_mixer", "--run-dir", "runs/unit"])
 
 
 if __name__ == "__main__":
