@@ -14,6 +14,9 @@ from .runtime import configure_runtime, read_config
 def main(argv=None):
     parser = argparse.ArgumentParser(description="UJIIndoorLoc IPS: MLP / MLP-Mixer / RSSI-KAN-Mixer")
     commands = parser.add_subparsers(dest="command", required=True)
+    factory_run = commands.add_parser("run", help="Run an IPS algorithm through the shared Factory")
+    factory_run.add_argument("--config", type=Path, required=True)
+    commands.add_parser("algorithms", help="List implemented IPS algorithm IDs")
     prepare = commands.add_parser("prepare", help="Audit + materialize + verify lesson-5 split")
     prepare.add_argument("--verify-only", action="store_true")
     check = commands.add_parser("check", help="Data integrity, tensor shapes, model parameter counts")
@@ -50,7 +53,18 @@ def main(argv=None):
     report_parser.add_argument("--experiment-root", type=Path, required=True)
     report_parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.command == "prepare":
+    if args.command == "algorithms":
+        from .experiments.factory import default_factory
+        print("Implemented: " + ", ".join(default_factory().available_ids()))
+        print("Not implemented: llm, huim, FastKAN, S-KAN")
+    elif args.command == "run":
+        from .experiments.contracts import ExperimentConfig
+        from .experiments.runner import ExperimentRunner
+        try:
+            ExperimentRunner().run(ExperimentConfig.from_json(args.config))
+        except (ValueError, NotImplementedError, FileExistsError) as error:
+            parser.error(str(error))
+    elif args.command == "prepare":
         scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py", "make_splits.py", "verify_splits.py"]
         for name in scripts:
             subprocess.run([sys.executable, str(ROOT / "docs/lessons/chang_05" / name)], check=True)
