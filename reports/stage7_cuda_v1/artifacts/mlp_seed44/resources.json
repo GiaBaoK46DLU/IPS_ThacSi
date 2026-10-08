@@ -1,0 +1,41 @@
+{
+  "training_phase": {
+    "scope": "whole_process_RSS_including_Python_native_libraries_and_data",
+    "sampling_interval_seconds": 0.01,
+    "samples": 6760,
+    "rss_start_bytes": 868929536,
+    "rss_peak_sampled_bytes": 1382850560,
+    "rss_end_bytes": 1382846464,
+    "windows_peak_working_set_since_process_start_bytes": 1382850560,
+    "note": "sampled peak may miss brief spikes; not model-only allocation"
+  },
+  "pipeline": {
+    "scope": "whole_process_RSS_including_Python_native_libraries_and_data",
+    "sampling_interval_seconds": 0.01,
+    "samples": 6988,
+    "rss_start_bytes": 584294400,
+    "rss_peak_sampled_bytes": 1382850560,
+    "rss_end_bytes": 1382842368,
+    "windows_peak_working_set_since_process_start_bytes": 1382850560,
+    "note": "sampled peak may miss brief spikes; not model-only allocation"
+  },
+  "cuda_training_phase": {
+    "peak_allocated_bytes": 71292416,
+    "peak_reserved_bytes": 73400320
+  },
+  "training_phase_seconds": 107.02742790000048,
+  "pipeline_seconds_including_data_and_initialization": 112.81506539997645,
+  "checkpoint_best_bytes": 1741473,
+  "parameter_tensor_bytes": 570428,
+  "buffer_tensor_bytes": 0,
+  "software": {
+    "python": "3.12.1",
+    "torch": "2.9.0+cu128",
+    "numpy": "2.2.6",
+    "scikit_learn": "1.6.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "device": "cuda",
+    "device_name": "NVIDIA GeForce RTX 4060 Ti",
+    "threads": 4
+  }
+}
