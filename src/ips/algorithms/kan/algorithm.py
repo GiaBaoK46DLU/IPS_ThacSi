@@ -1,4 +1,5 @@
-﻿"""KAN-Mixer IPS lifecycle; torch imports stay inside this backend."""
+﻿from __future__ import annotations
+"""KAN-Mixer IPS lifecycle; torch imports stay inside this backend."""
 import csv
 import json
 from pathlib import Path
@@ -114,4 +115,5 @@ class KANMixerAlgorithm(Algorithm):
         return ModelDiagram('flowchart LR\n    A["520 AP: RSSI + mask"] --> B["'+backbone+
             f'"]\n    B --> C["{len(self._checkpoint["classes"])} logits: building/floor"]'
             '\n    B --> D["2 coordinates: inverse to metres"]\n', "mermaid")
+
 
