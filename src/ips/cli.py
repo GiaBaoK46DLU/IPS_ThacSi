@@ -1,18 +1,18 @@
 """CLI chạy tại repo: python -m ips hoặc ips sau editable install."""
 import argparse
-import copy
 import subprocess
 import sys
 from pathlib import Path
 
 from .data import OUTPUT, ROOT
-from .dataset import load_bundle
-from .models import build_model, parameter_count
-from .runtime import configure_runtime, read_config
+from .data_access import load_bundle
+from .algorithms.kan.models import build_model, parameter_count
+from .algorithms.kan.runtime import configure_runtime, read_config
+from .algorithms.kan.paths import MODEL_CONFIG, resolve_config_path
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="UJIIndoorLoc IPS: MLP / MLP-Mixer / RSSI-KAN-Mixer")
+    parser = argparse.ArgumentParser(description="Shared UJIIndoorLoc IPS: KAN-Mixer")
     commands = parser.add_subparsers(dest="command", required=True)
     factory_run = commands.add_parser("run", help="Run an IPS algorithm through the shared Factory")
     factory_run.add_argument("--config", type=Path, required=True)
@@ -20,11 +20,11 @@ def main(argv=None):
     prepare = commands.add_parser("prepare", help="Audit + materialize + verify lesson-5 split")
     prepare.add_argument("--verify-only", action="store_true")
     check = commands.add_parser("check", help="Data integrity, tensor shapes, model parameter counts")
-    check.add_argument("--config", type=Path, default=ROOT / "configs/base.json")
+    check.add_argument("--config", type=Path, default=MODEL_CONFIG)
     check.add_argument("--device", default="cpu")
     train_parser = commands.add_parser("train", help="Train with internal validation only")
-    train_parser.add_argument("--config", type=Path, default=ROOT / "configs/base.json")
-    train_parser.add_argument("--model", choices=["mlp", "mlp_mixer", "kan_mixer"], required=True)
+    train_parser.add_argument("--config", type=Path, default=MODEL_CONFIG)
+    train_parser.add_argument("--model", choices=["kan_mixer"], default="kan_mixer")
     train_parser.add_argument("--seed", type=int, default=42)
     train_parser.add_argument("--device", default="auto")
     train_parser.add_argument("--epochs", type=int)
@@ -49,9 +49,6 @@ def main(argv=None):
     benchmark_parser.add_argument("--warmup", type=int, default=10)
     benchmark_parser.add_argument("--repeats", type=int, default=100)
     benchmark_parser.add_argument("--device", default="cuda")
-    report_parser = commands.add_parser("report", help="Audit and summarize a completed nine-run stage-7 suite")
-    report_parser.add_argument("--experiment-root", type=Path, required=True)
-    report_parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "algorithms":
         from .experiments.factory import default_factory
@@ -61,7 +58,7 @@ def main(argv=None):
         from .experiments.contracts import ExperimentConfig
         from .experiments.runner import ExperimentRunner
         try:
-            ExperimentRunner().run(ExperimentConfig.from_json(args.config))
+            ExperimentRunner().run(ExperimentConfig.from_json(resolve_config_path(args.config)))
         except (ValueError, NotImplementedError, FileExistsError) as error:
             parser.error(str(error))
     elif args.command == "prepare":
@@ -70,13 +67,14 @@ def main(argv=None):
             subprocess.run([sys.executable, str(ROOT / "docs/lessons/chang_05" / name)], check=True)
     elif args.command == "check":
         import torch
+        from .algorithms.kan.dataset import FingerprintDataset
         config = read_config(args.config)
         device = configure_runtime(42, args.device, config["training"]["threads"])
         bundle = load_bundle(ROOT / config["split_dir"])
-        features = bundle.dataset("train", limit=2).features.to(device)
+        features = FingerprintDataset.from_split(bundle.split("train", limit=2)).features.to(device)
         counts = {}
-        for name in ["mlp", "mlp_mixer", "kan_mixer"]:
-            current = copy.deepcopy(config)
+        for name in ["kan_mixer"]:
+            current = dict(config)
             current["model"] = name
             model = build_model(current, len(bundle.classes)).to(device).eval()
             with torch.inference_mode():
@@ -88,22 +86,19 @@ def main(argv=None):
                   f"logits={list(output['logits'].shape)}, xy={list(output['xy'].shape)}")
         print("PASS: data integrity and forward shapes.")
     elif args.command == "train":
-        from .train import train
+        from .algorithms.kan.train import train
         config = read_config(args.config)
         config["model"] = args.model
         train(config, args.run_dir, args.seed, args.device, args.epochs, args.smoke)
     elif args.command == "predict":
-        from .predict import predict
+        from .algorithms.kan.predict import predict
         predict(args.checkpoint, args.csv, args.output, args.device)
     elif args.command == "evaluate":
-        from .predict import evaluate
+        from .algorithms.kan.predict import evaluate
         evaluate(args.checkpoint, args.split_dir, args.split, args.output_dir, args.device)
     elif args.command == "benchmark":
-        from .benchmark import benchmark
+        from .algorithms.kan.benchmark import benchmark
         benchmark(args.checkpoint, args.csv, args.output, args.batch_size, args.warmup, args.repeats, args.device)
-    elif args.command == "report":
-        from .analysis import report
-        report(args.experiment_root, args.output_dir)
 
 
 if __name__ == "__main__":

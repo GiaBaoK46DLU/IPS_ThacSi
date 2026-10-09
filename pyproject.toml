@@ -1,4 +1,4 @@
-[build-system]
+﻿[build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
@@ -16,4 +16,5 @@ ips = "ips.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"ips.models.vendor" = ["*.json", "LICENSE.*"]
+"ips.algorithms.kan.models.vendor" = ["*.json", "LICENSE.*"]
+"ips.algorithms.kan" = ["configs/*.json", "README.md"]

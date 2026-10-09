@@ -1,4 +1,4 @@
-"""Registry factory at the IPS algorithm level; no fake LLM/HUIM registration."""
+﻿"""Registry factory at the IPS algorithm level; no fake LLM/HUIM registration."""
 from __future__ import annotations
 import copy
 import inspect
@@ -44,6 +44,8 @@ class AlgorithmFactory:
             raise ValueError("Factory ID differs from ExperimentConfig.algorithm_id.")
         implementation = self._registry.get(algorithm_id)
         if implementation is None:
+            if algorithm_id in ("mlp", "mlp_mixer"):
+                raise UnknownAlgorithmError("MLP/MLP-Mixer are personal study baselines, excluded from the shared Factory. Choose kan_mixer.")
             if algorithm_id in self.unavailable:
                 raise AlgorithmNotImplementedError(self.unavailable[algorithm_id])
             raise UnknownAlgorithmError(f"Unregistered algorithm_id '{algorithm_id}'. Available: {', '.join(self.available_ids())}")
@@ -51,11 +53,9 @@ class AlgorithmFactory:
 
 
 def default_factory() -> AlgorithmFactory:
-    from ..algorithms.neural.adapter import KANMixerAlgorithm, MLPAlgorithm, MLPMixerAlgorithm
+    from ..algorithms.kan import KANMixerAlgorithm
     from ..algorithms.hierarchical.adapter import HierarchicalAlgorithm
     factory = AlgorithmFactory()
-    for name, implementation in (("kan_mixer", KANMixerAlgorithm), ("mlp", MLPAlgorithm),
-                                  ("mlp_mixer", MLPMixerAlgorithm),
-                                  ("hierarchical", HierarchicalAlgorithm)):
-        factory.register(name, implementation)
+    factory.register("kan_mixer", KANMixerAlgorithm)
+    factory.register("hierarchical", HierarchicalAlgorithm)
     return factory

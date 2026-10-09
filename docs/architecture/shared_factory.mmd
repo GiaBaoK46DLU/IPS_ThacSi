@@ -1,19 +1,16 @@
 classDiagram
     direction TB
+    class ExperimentRunner {
+        +run(config) RunResult
+    }
     class ExperimentConfig {
         +algorithm_id: str
         +params: dict
         +split_dir: Path
         +output_dir: Path
     }
-    class ExperimentRunner {
-        +run(config) RunResult
-    }
     class DatasetRepository {
         +load(directory) Bundle
-    }
-    class Bundle {
-        +split(name) FingerprintSplit
     }
     class AlgorithmFactory {
         +register(id, concrete_class)
@@ -26,15 +23,9 @@ classDiagram
         +predict(inputs) IPSPredictions
         +get_diagram() optional
     }
-    class NeuralAlgorithm {
-        <<abstract>>
-        +model_id: str
-    }
     class KANMixerAlgorithm {
         efficient-kan B-spline
     }
-    class MLPAlgorithm
-    class MLPMixerAlgorithm
     class LLMAlgorithm {
         <<abstract>>
         Chua dang ky
@@ -43,12 +34,8 @@ classDiagram
         <<abstract>>
         Chua dang ky
     }
-    class IPSEvaluator {
-        +evaluate(truth, prediction, task)
-    }
-    class ReportExporter {
-        +export(result, splits, directory)
-    }
+    class IPSEvaluator
+    class ReportExporter
     class RunResult {
         +predictions: dict
         +metrics: dict
@@ -57,20 +44,15 @@ classDiagram
         +history: optional
         +resources: optional
         +diagram: optional
-        +artifacts: dict
     }
     ExperimentRunner --> ExperimentConfig
+    ExperimentRunner --> DatasetRepository : CSV - split
     ExperimentRunner --> AlgorithmFactory : tao
-    ExperimentRunner --> DatasetRepository : audit + split
-    DatasetRepository --> Bundle : NumPy
+    AlgorithmFactory ..> KANMixerAlgorithm : registry kan_mixer
     ExperimentRunner --> Algorithm : prepare - execute - predict
-    Algorithm <|-- NeuralAlgorithm
-    NeuralAlgorithm <|-- KANMixerAlgorithm
-    NeuralAlgorithm <|-- MLPAlgorithm
-    NeuralAlgorithm <|-- MLPMixerAlgorithm
+    Algorithm <|-- KANMixerAlgorithm
     Algorithm <|-- LLMAlgorithm
     Algorithm <|-- HUIMAlgorithm
-    AlgorithmFactory ..> NeuralAlgorithm : registry 3 lop cu the
     ExperimentRunner --> IPSEvaluator
     ExperimentRunner --> ReportExporter
     ExperimentRunner --> RunResult : tra ve

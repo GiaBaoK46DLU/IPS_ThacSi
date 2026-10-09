@@ -70,12 +70,6 @@ class Bundle:
         return FingerprintSplit(split, inputs, labels, data.metadata[indices, :2],
             {name: data.column(name)[indices] for name in META_COLUMNS}, self.info)
 
-    def dataset(self, split: str, limit: int | None = None):
-        """Legacy neural adapter, imported only when tensors are requested."""
-        from ..dataset import FingerprintDataset
-        return FingerprintDataset.from_split(self.split(split, limit))
-
-
 def load_bundle(directory: Path) -> Bundle:
     directory = Path(directory)
     manifest = read_json(directory / "manifest.json")
