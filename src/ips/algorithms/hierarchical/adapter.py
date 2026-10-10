@@ -21,6 +21,7 @@ class HierarchicalAlgorithm(Algorithm):
         # Hyperparameters can be passed via config.params
         self.n_estimators = self.config.params.get("n_estimators", 50)
         self.n_neighbors = self.config.params.get("n_neighbors", 3)
+        self.metric = self.config.params.get("metric", "euclidean")
         self.penalty_weight = self.config.params.get("penalty_weight", 1000.0)
         self.seed = self.config.seed
         
@@ -73,7 +74,7 @@ class HierarchicalAlgorithm(Algorithm):
             floors * self.penalty_weight
         ))
         self.reg_coords = KNeighborsRegressor(
-            n_neighbors=self.n_neighbors, weights='distance', metric='euclidean'
+            n_neighbors=self.n_neighbors, weights='distance', metric=self.metric
         )
         self.reg_coords.fit(X_train_coords, y_train_coords)
 
