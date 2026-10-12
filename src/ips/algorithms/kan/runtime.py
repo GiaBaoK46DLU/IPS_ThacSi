@@ -44,6 +44,10 @@ def read_config(path: Path) -> dict:
         train["learning_rate"] <= 0 or train["weight_decay"] < 0 or train["gradient_clip_l2"] <= 0 or
         config["loss"]["lambda_xy"] < 0 or config["loss"]["smooth_l1_beta"] <= 0):
         raise ValueError("Invalid training/loss hyperparameters.")
+    if config["loss"].get("reference_sigma_normalized", 0) < 0:
+        raise ValueError("Reference spatial smoothing radius must be nonnegative.")
+    if train.get("scheduler") not in (None, "cosine"):
+        raise ValueError("Supported scheduler: cosine (or omit for constant learning rate).")
     return config
 
 

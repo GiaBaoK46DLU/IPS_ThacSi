@@ -111,6 +111,8 @@ class KANMixerAlgorithm(Algorithm):
         mixer = settings["mixer"]
         backbone = (f"efficient-kan B-spline: {mixer['tokens']} tokens, {mixer['channels']} channels, "
                     f"{mixer['blocks']} blocks")
+        if settings.get("positioning", {}).get("variant") == "reference":
+            backbone += f"; {len(settings['positioning']['references'])} train reference points"
         return ModelDiagram('flowchart LR\n    A["520 AP: RSSI + mask"] --> B["'+backbone+
             f'"]\n    B --> C["{len(self._checkpoint["classes"])} logits: building/floor"]'
             '\n    B --> D["2 coordinates: inverse to metres"]\n', "mermaid")
