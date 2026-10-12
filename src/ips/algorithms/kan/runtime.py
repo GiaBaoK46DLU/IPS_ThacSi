@@ -73,8 +73,17 @@ def load_checkpoint(path, device):
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
     if checkpoint.get("format_version") not in (1, 2):
         raise ValueError("Unsupported checkpoint format.")
-    model = build_model(checkpoint["config"], len(checkpoint["classes"]))
-    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    if "ensemble_members" in checkpoint:
+        from .models.ensemble import EnsembleReferenceKANMixer
+        members = []
+        for member in checkpoint["ensemble_members"]:
+            network = build_model(member["config"], len(checkpoint["classes"]))
+            network.load_state_dict(member["model_state_dict"], strict=True)
+            members.append(network)
+        model = EnsembleReferenceKANMixer(members, checkpoint["ensemble_confidence_weighted"])
+    else:
+        model = build_model(checkpoint["config"], len(checkpoint["classes"]))
+        model.load_state_dict(checkpoint["model_state_dict"], strict=True)
     if "fingerprint_refinement" in checkpoint:
         from .models.refinement import RefinedKANMixer
         model = RefinedKANMixer(model, checkpoint["fingerprint_refinement"])
