@@ -76,6 +76,8 @@ class KANMixerAlgorithm(Algorithm):
         self._device = device
         self._model, self._checkpoint = load_checkpoint(path, device)
         checkpoint, info = self._checkpoint, self._train.info
+        if checkpoint.get("metadata", {}).get("full_development_refit") and "validation" in self.config.evaluation_splits:
+            raise ValueError("Final refit incorporated validation into training; request test-only evaluation.")
         if (checkpoint["config"]["model"] != self.model_id or checkpoint["ap_order"] != info.ap_order or
                 checkpoint["classes"] != info.classes or checkpoint["preprocessing"] != info.preprocessing or
                 checkpoint["split_manifest_sha256"] != sha256(info.directory/"manifest.json")):
