@@ -1,4 +1,13 @@
-"""Extension point only, intentionally not in the default registry."""
-from .adapter import LLMAlgorithm
+"""LLM-based IPS algorithms."""
+from .adapter import LLMAlgorithm, LLMAutoLoCAlgorithm
+from .autoloc import AutoLoCEngine, AutoLoCPrediction, NeighborRecord, ScarcityResult, compute_metrics
 
-__all__ = ["LLMAlgorithm"]
+__all__ = [
+    "LLMAlgorithm",
+    "LLMAutoLoCAlgorithm",
+    "AutoLoCEngine",
+    "AutoLoCPrediction",
+    "NeighborRecord",
+    "ScarcityResult",
+    "compute_metrics",
+]
