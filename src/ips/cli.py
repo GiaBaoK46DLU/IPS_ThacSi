@@ -71,6 +71,9 @@ def main(argv=None):
         config = read_config(args.config)
         device = configure_runtime(42, args.device, config["training"]["threads"])
         bundle = load_bundle(ROOT / config["split_dir"])
+        if config.get("positioning", {}).get("variant") == "reference":
+            from .algorithms.kan.models.reference import fit_reference_points
+            fit_reference_points(config, FingerprintDataset.from_split(bundle.split("train")))
         features = FingerprintDataset.from_split(bundle.split("train", limit=2)).features.to(device)
         counts = {}
         for name in ["kan_mixer"]:
