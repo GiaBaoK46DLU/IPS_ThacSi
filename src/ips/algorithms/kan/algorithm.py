@@ -113,6 +113,8 @@ class KANMixerAlgorithm(Algorithm):
                     f"{mixer['blocks']} blocks")
         if settings.get("positioning", {}).get("variant") == "reference":
             backbone += f"; {len(settings['positioning']['references'])} train reference points"
+        if "fingerprint_refinement" in self._checkpoint:
+            backbone += "; explicit hybrid with train-only fingerprint retrieval"
         return ModelDiagram('flowchart LR\n    A["520 AP: RSSI + mask"] --> B["'+backbone+
             f'"]\n    B --> C["{len(self._checkpoint["classes"])} logits: building/floor"]'
             '\n    B --> D["2 coordinates: inverse to metres"]\n', "mermaid")

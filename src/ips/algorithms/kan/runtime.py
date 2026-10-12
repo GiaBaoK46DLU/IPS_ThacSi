@@ -71,9 +71,12 @@ def code_hashes():
 def load_checkpoint(path, device):
     # Payload chỉ gồm state_dict, tensor và kiểu primitive: weights_only=True.
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-    if checkpoint.get("format_version") != 1:
+    if checkpoint.get("format_version") not in (1, 2):
         raise ValueError("Unsupported checkpoint format.")
     model = build_model(checkpoint["config"], len(checkpoint["classes"]))
     model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    if "fingerprint_refinement" in checkpoint:
+        from .models.refinement import RefinedKANMixer
+        model = RefinedKANMixer(model, checkpoint["fingerprint_refinement"])
     model.to(device).eval()
     return model, checkpoint
