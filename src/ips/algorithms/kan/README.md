@@ -85,4 +85,4 @@ FastKAN/S-KAN chưa được triển khai trong nhánh này.
 
 Chi tiết từng file và giới hạn: [Giải thích thay đổi](GIAI_THICH_THAY_DOI_2026-10-09.md).
 
-[Kiến trúc nhóm](../../../../docs/architecture/shared_factory.md) · [README dự án](../../../../README.md).
+[Hợp đồng Algorithm](../base.py) · [README dự án](../../../../README.md).

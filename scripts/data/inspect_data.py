@@ -43,7 +43,7 @@ def stats(data):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent / "artifacts")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "runs" / "data_audit")
     args = parser.parse_args()
     train = read_data(RAW / "trainingData.csv")
     test = read_data(RAW / "validationData.csv")

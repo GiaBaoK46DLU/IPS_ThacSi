@@ -10,4 +10,5 @@ source_id/row_indices và hệ tọa độ/cặp nhãn chung.
 
 Nhóm cần chốt binning RSSI/missing, utility, thuật toán/ngưỡng khai phá, khớp pattern, suy ra tòa/tầng/xy,
 không khớp/nhiều khớp và thời gian/bộ nhớ mine/predict. Có concrete Algorithm thật và tests rồi mới đăng ký.
-Adapter này không được đăng ký trong default_factory. Xem [kiến trúc chung](../../../../docs/architecture/shared_factory.md).
+Adapter này không được đăng ký trong default_factory. Xem [hợp đồng Algorithm](../base.py)
+và [kiểu dữ liệu chung](../../experiments/contracts.py).

@@ -62,9 +62,13 @@ def main(argv=None):
         except (ValueError, NotImplementedError, FileExistsError) as error:
             parser.error(str(error))
     elif args.command == "prepare":
-        scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py", "make_splits.py", "verify_splits.py"]
+        scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py"]
+        if not args.verify_only:
+            if not (OUTPUT / "manifest.json").is_file():
+                scripts.append("make_splits.py")
+            scripts.append("verify_splits.py")
         for name in scripts:
-            subprocess.run([sys.executable, str(ROOT / "docs/lessons/chang_05" / name)], check=True)
+            subprocess.run([sys.executable, str(ROOT / "scripts/data" / name)], check=True)
     elif args.command == "check":
         import torch
         from .algorithms.kan.dataset import FingerprintDataset
