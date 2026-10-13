@@ -1,11 +1,9 @@
-# BÁO CÁO NGHIÊN CỨU HOÀN CHỈNH HỌC PHẦN THẠC SĨ
-## ĐỀ TÀI: PHƯƠNG PHÁP ĐỊNH VỊ WI-FI TRONG NHÀ LAI GHÉP RỪNG NGẪU NHIÊN PHÂN CẤP VÀ MÔ HÌNH NGÔN NGỮ LỚN CỤC BỘ (HYBRID RF + AUTOLOC LLM)
+# BÁO CÁO NGHIÊN CỨU 
+## PHƯƠNG PHÁP ĐỊNH VỊ WI-FI TRONG NHÀ LAI GHÉP RANDOM FOREST PHÂN CẤP VÀ MÔ HÌNH NGÔN NGỮ LỚN CỤC BỘ (HYBRID RF + AUTOLOC LLM)
 ### CƠ CHẾ SUY LUẬN, CÔNG THỨC TOÁN HỌC, PHÂN TÍCH ĐÁNH ĐỔI ĐỘ THIẾU HỤT DỮ LIỆU (20% – 100%) VÀ THỜI GIAN SUY LUẬN THỰC TẾ
 
 ---
 
-* **Học phần:** Nghiên cứu Khoa học Thạc sĩ (Tiền đề phát triển Luận văn Thạc sĩ).
-* **Phân hệ phụ trách:** Phân hệ Thuật toán Định vị Trong Nhà (Indoor Positioning Algorithm Module).
 * **Tập dữ liệu chuẩn:** UJIIndoorLoc Benchmark Dataset ($19,937$ mẫu phát triển + $1,111$ mẫu Blind Test độc lập, $520$ Wi-Fi Access Points, $3$ Tòa nhà, $4\text{--}5$ Tầng/Tòa).
 * **Mô hình LLM cục bộ:** Ollama Local Server (`llama3.2:1b` & `phi3:mini` chạy trên GPU NVIDIA RTX 3050 Ti).
 * **Tích hợp hệ thống:** Đã đăng ký vào `default_factory()` với các mã định danh: `hierarchical` (RF+KNN), `llm` (Pure AutoLoC), và `rf_autoloc` (Hybrid RF+AutoLoC).
@@ -273,7 +271,7 @@ Task: Analyze physical signal continuity among the floor-locked neighbors and re
 
 ## 6. PHÂN TÍCH SỰ THIẾU HỤT THÔNG TIN (20% – 100%) & BÀI TOÁN ĐÁNH ĐỔI TỐI ƯU Ở MỨC 40% – 50%
 
-Một phát hiện thực nghiệm cực kỳ đắt giá trong nghiên cứu này chính là **mối quan hệ phi tuyến giữa Tỷ lệ dữ liệu tham chiếu (% Memory), Độ chính xác định vị và Thời gian xử lý**:
+**Mối quan hệ phi tuyến giữa Tỷ lệ dữ liệu tham chiếu (% Memory), Độ chính xác định vị và Thời gian xử lý**:
 
 ### 6.1. Sự thiếu hụt thông tin ảnh hưởng như thế nào qua từng ngưỡng?
 
@@ -379,29 +377,3 @@ Tại sao **Hybrid RF + AutoLoC** có tích hợp LLM mà độ trễ trung bìn
 | **Khả năng chống xuyên sàn** | Kém (Ảo giác xuyên bê tông) | Trung bình (Nhầm biên giới tòa) | Rất tốt (Nhờ $W=1000$) | **Tuyệt đối (Khóa miền con + Khuếch đại mũ)** |
 
 ---
-
-## 9. ĐỀ CƯƠNG CHI TIẾT THIẾT KẾ SLIDE THUYẾT TRÌNH (10 SLIDES CHUẨN HỌC THUẬT)
-
-Bạn có thể dựa trực tiếp vào bố cục 10 Slide dưới đây để tạo bài thuyết trình:
-
-1. **Slide 1 – Trang Bìa:**
-   * *Tiêu đề:* Nghiên cứu Thuật toán Định vị Wi-Fi Trong Nhà: Kiến trúc Lai ghép Rừng Ngẫu Nhiên Phân Cấp và Suy Luận Ngôn Ngữ Lớn Cục Bộ (Hybrid RF + AutoLoC LLM).
-2. **Slide 2 – Bối Cảnh & Nghịch Lý Bổ Khuyết (Motivation):**
-   * Nêu 3 thách thức của UJIIndoorLoc ($520$ APs thưa, nhiễu đa đường, rò rỉ xuyên tầng).
-   * Chỉ ra nghịch lý: **RF + KNN** cực giỏi khóa Tòa/Tầng ($99.9\%$) nhưng nội suy tọa độ bị kéo lệch bởi ngoại lai ($9.27\text{m}$); ngược lại **Pure AutoLoC (LLM)** nội suy tọa độ cục bộ rất mịn ($4.4\text{m}$) nhưng nén PCA toàn cục làm mất biên giới khiến đoán Tòa/Tầng chỉ đạt $\sim 70\%$.
-3. **Slide 3 – Kiến Trúc Đề Xuất: Hybrid RF + AutoLoC (Sơ đồ khối):**
-   * Đưa sơ đồ khối 4 giai đoạn ở **Mục 2** lên slide: Tiền xử lý kép $\rightarrow$ Cascaded RF khóa $(\hat{B}, \hat{F})$ $\rightarrow$ Truy xuất Không gian Kép Nội sàn $\mathcal{M}_{(\hat{B}, \hat{F})}$ $\rightarrow$ Cổng kiểm soát độ bất định & Ollama LLM Reasoning.
-4. **Slide 4 – Cơ Sở Toán Học & Công Thức Cốt Lõi:**
-   * Trình bày 4 công thức ở **Mục 3.4**: (1) Khuếch đại phi tuyến $(X')^{1.5}$, (2) Khoảng cách kép $D_{\text{hybrid}} = Z(d_{L_1}) + 0.30 Z(d_{\text{PCA}})$, (3) Hàm lọc ngoại lai mũ quanh trung vị $\mathbf{p}_{\text{med}}$, và (4) Hợp nhất Bayes $\hat{\mathbf{p}}_q = \lambda \mathbf{p}_{\text{LLM}} + (1-\lambda)\mathbf{p}_{\text{prior}}$.
-5. **Slide 5 – Thiết Kế Prompt & Cơ Chế Suy Luận Của Local LLM (Ollama):**
-   * Trình bày **Mẫu Prompt** và **Ví dụ JSON thực tế** ở **Mục 4.2 & 4.3**. Giải thích cách LLM tận dụng Top-3 WAP mạnh nhất và Điểm neo tiên nghiệm (`Spatial Prior Anchor`) để tinh chỉnh tọa độ.
-6. **Slide 6 – Kết Quả Thực Nghiệm 1: So Sánh Với Pure AutoLoC & RF+KNN (Tập Validation):**
-   * Đưa **Bảng 1 (Mục 5.1)** lên slide. Nhấn mạnh: Hybrid RF + AutoLoC nâng Combined Acc từ $70\%$ lên **$100\%$**, nâng độ chính xác Phòng (`SpaceID`) từ $22\%$ lên **$84.00\%$**, và hạ sai số 2D xuống kỷ lục **$2.32\text{m}$** (Median **$0.40\text{m}$**).
-7. **Slide 7 – Kết Quả Thực Nghiệm 2: Đánh Giá Trên Tập Blind Test Chính Thức ($1,111$ mẫu):**
-   * Đưa **Bảng 2 (Mục 5.2)** lên slide. Nhấn mạnh: Đạt **$99.91\%$ Tòa nhà (1,110/1,111 đúng)**, nâng độ chính xác Tầng lên **$91.27\%$**, hạ sai số trung bình xuống **$8.60\text{m}$** và trung vị xuống **$5.27\text{m}$** (vượt xa mốc $15.80\text{m}$ của mạng Deep Learning).
-8. **Slide 8 – Phân Tích Sự Thiếu Hụt Thông Tin (20% – 100%) & Điểm Đánh Đổi Vàng 40% – 50%:**
-   * Đưa biểu đồ & phân tích ở **Mục 6** lên slide: Chỉ ra phát hiện thực nghiệm rằng ở mức **$40\% - 50\%$ dữ liệu**, sai số chỉ chênh lệch **$0.10\text{m} - 0.22\text{m}$** so với $100\%$ dữ liệu nhưng **giảm một nửa chi phí đo đạc và tăng tốc độ chạy gấp $3.1\text{ lần}$**.
-9. **Slide 9 – Phân Tích Thời Gian Suy Luận (Inference Latency):**
-   * Đưa **Bảng Thời gian (Mục 7.1)** lên slide: Chứng minh cơ chế Confidence-Gated LLM giúp giảm độ trễ từ **$800\text{ ms/mẫu}$** (Pure AutoLoC) xuống chỉ còn **$5.0 - 9.9\text{ ms/mẫu}$** (nhanh gấp 80–130 lần, đạt chuẩn thời gian thực).
-10. **Slide 10 – Kết Luận & Định Hướng Phát Triển Luận Văn:**
-    * Tổng kết đóng góp khoa học và hướng mở rộng cho Luận văn Thạc sĩ.
