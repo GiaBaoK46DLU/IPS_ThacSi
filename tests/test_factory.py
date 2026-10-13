@@ -15,6 +15,7 @@ import numpy as np
 import torch
 
 from ips.algorithms.base import Algorithm
+from ips.algorithms.huim import HUIMKNNAlgorithm
 from ips.algorithms.huim.adapter import HUIMAlgorithm
 from ips.algorithms.llm.adapter import LLMAlgorithm
 from ips.algorithms.kan import KANMixerAlgorithm
@@ -69,14 +70,14 @@ class FactoryTests(unittest.TestCase):
 
     def test_registry_creates_only_implemented_algorithms(self):
         factory = default_factory()
-        self.assertEqual(factory.available_ids(), ("kan_mixer",))
+        self.assertEqual(factory.available_ids(), ("huim", "kan_mixer"))
         self.assertEqual(KANMixerAlgorithm.__bases__, (Algorithm,))
-        for name, implementation in (("kan_mixer", KANMixerAlgorithm),):
+        for name, implementation in (("kan_mixer", KANMixerAlgorithm), ("huim", HUIMKNNAlgorithm)):
             algorithm = factory.create(name, self.config(name))
             self.assertIsInstance(algorithm, implementation)
             self.assertIsInstance(algorithm, Algorithm)
             self.assertNotIsInstance(algorithm, torch.nn.Module)
-        for name in ("llm", "huim", "fastkan", "s_kan"):
+        for name in ("llm", "fastkan", "s_kan"):
             with self.assertRaisesRegex(AlgorithmNotImplementedError, "not implemented|no .*implementation"):
                 factory.create(name, self.config(name))
         with self.assertRaisesRegex(UnknownAlgorithmError, "Unregistered.*Available"):
@@ -289,7 +290,7 @@ class FactoryTests(unittest.TestCase):
             self.assertNotIn("mlp", output.getvalue())
         with patch("sys.stdout", new=io.StringIO()) as output:
             main(["algorithms"])
-            self.assertIn("Implemented: kan_mixer", output.getvalue())
+            self.assertIn("Implemented: huim, kan_mixer", output.getvalue())
             self.assertNotIn("mlp", output.getvalue())
         with patch("sys.stderr", new=io.StringIO()), self.assertRaises(SystemExit):
             main(["train", "--model", "mlp_mixer", "--run-dir", "runs/unit"])
