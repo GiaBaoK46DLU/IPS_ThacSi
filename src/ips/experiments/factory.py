@@ -1,4 +1,4 @@
-"""Registry factory at the IPS algorithm level; no fake LLM/HUIM registration."""
+"""Registry factory at the IPS algorithm level; no fake LLM registration."""
 import copy
 import inspect
 
@@ -16,7 +16,6 @@ class AlgorithmNotImplementedError(NotImplementedError):
 
 class AlgorithmFactory:
     unavailable = {"llm": "LLM adapter has no RSSI-to-position implementation yet",
-                   "huim": "HUIM adapter has no itemset-to-position implementation yet",
                    "fastkan": "FastKAN is not implemented; current KAN uses efficient-kan B-splines",
                    "s_kan": "S-KAN is not implemented",
                    "fast_kan_mixer": "FastKAN-Mixer is not implemented",
@@ -52,7 +51,9 @@ class AlgorithmFactory:
 
 
 def default_factory() -> AlgorithmFactory:
+    from ..algorithms.huim import HUIMKNNAlgorithm
     from ..algorithms.kan import KANMixerAlgorithm
     factory = AlgorithmFactory()
+    factory.register("huim", HUIMKNNAlgorithm)
     factory.register("kan_mixer", KANMixerAlgorithm)
     return factory

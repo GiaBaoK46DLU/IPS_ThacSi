@@ -12,7 +12,7 @@ from .algorithms.kan.paths import MODEL_CONFIG, resolve_config_path
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Shared UJIIndoorLoc IPS: KAN-Mixer")
+    parser = argparse.ArgumentParser(description="Shared UJIIndoorLoc IPS: KAN-Mixer, HUIM")
     commands = parser.add_subparsers(dest="command", required=True)
     factory_run = commands.add_parser("run", help="Run an IPS algorithm through the shared Factory")
     factory_run.add_argument("--config", type=Path, required=True)
@@ -53,7 +53,7 @@ def main(argv=None):
     if args.command == "algorithms":
         from .experiments.factory import default_factory
         print("Implemented: " + ", ".join(default_factory().available_ids()))
-        print("Not implemented: llm, huim, FastKAN, S-KAN")
+        print("Not implemented: llm, FastKAN, S-KAN")
     elif args.command == "run":
         from .experiments.contracts import ExperimentConfig
         from .experiments.runner import ExperimentRunner

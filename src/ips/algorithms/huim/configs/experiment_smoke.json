@@ -1,0 +1,18 @@
+{
+  "algorithm_id": "huim",
+  "params": {
+    "utility_model": "B",
+    "max_huis": 100000,
+    "time_limit_s": 60.0
+  },
+  "split_dir": "data/processed/uji_group_split_v1",
+  "task": "position",
+  "seed": 42,
+  "device": "cpu",
+  "smoke": true,
+  "evaluation_splits": [
+    "validation"
+  ],
+  "export_plots": true,
+  "output_dir": "runs/huim_smoke"
+}
