@@ -54,9 +54,10 @@ class AlgorithmFactory:
 def default_factory() -> AlgorithmFactory:
     from ..algorithms.kan import KANMixerAlgorithm
     from ..algorithms.hierarchical.adapter import HierarchicalAlgorithm
-    from ..algorithms.llm.adapter import LLMAutoLoCAlgorithm
+    from ..algorithms.llm.adapter import HybridRFAutoLoCAlgorithm, LLMAutoLoCAlgorithm
     factory = AlgorithmFactory()
     factory.register("kan_mixer", KANMixerAlgorithm)
     factory.register("hierarchical", HierarchicalAlgorithm)
     factory.register("llm", LLMAutoLoCAlgorithm)
+    factory.register("rf_autoloc", HybridRFAutoLoCAlgorithm)
     return factory

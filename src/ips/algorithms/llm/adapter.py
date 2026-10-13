@@ -162,3 +162,44 @@ class LLMAutoLoCAlgorithm(LLMAlgorithm):
         )
 
         return self.decode_position(predictions, inputs)
+
+
+class HybridRFAutoLoCAlgorithm(LLMAutoLoCAlgorithm):
+    """Hybrid Cascaded Random Forest + Floor-Locked AutoLoC LLM Algorithm."""
+
+    def __init__(self, config: ExperimentConfig):
+        super().__init__(config)
+        from .hybrid_autoloc import HybridRFAutoLoCEngine
+        params = self.config.params or {}
+        self.engine = HybridRFAutoLoCEngine(
+            n_estimators=params.get("n_estimators", 50),
+            n_components=params.get("n_components", 15),
+            n_neighbors=params.get("n_neighbors", 5),
+            knn_k=params.get("knn_k", 9),
+            model_name=self.model_name,
+            ollama_url=self.ollama_url,
+            seed=self.seed,
+        )
+
+    def prepare(self, train: FingerprintSplit) -> None:
+        if train.name != "train":
+            raise ValueError("Hybrid RF+AutoLoC preparation requires the train split.")
+        self._train = train
+        self._classes = train.info.classes
+
+        n_waps = train.inputs.rssi.shape[1]
+        self._wap_cols = [f"WAP{i+1:03d}" for i in range(n_waps)]
+
+        buildings = np.array([self._classes[cid]["building"] for cid in train.class_ids], dtype=int)
+        floors = np.array([self._classes[cid]["floor"] for cid in train.class_ids], dtype=int)
+
+        df_dict = {col: train.inputs.rssi[:, i] for i, col in enumerate(self._wap_cols)}
+        df_dict["BUILDINGID"] = buildings
+        df_dict["FLOOR"] = floors
+        df_dict["SPACEID"] = np.zeros(len(buildings), dtype=int)
+        df_dict["LATITUDE"] = train.xy[:, 1]
+        df_dict["LONGITUDE"] = train.xy[:, 0]
+
+        train_df = pd.DataFrame(df_dict)
+        self.engine.fit(train_df, wap_cols=self._wap_cols)
+

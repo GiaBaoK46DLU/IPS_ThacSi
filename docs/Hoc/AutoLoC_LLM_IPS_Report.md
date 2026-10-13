@@ -1,10 +1,8 @@
 # Báo Cáo Nghiên Cứu: Phương Pháp Định Vị Trong Nhà AutoLoC Phối Hợp LLM Cục Bộ (Ollama)
 
-> **Học phần:** Nghiên cứu Thạc sĩ - Phân hệ Thuật toán Định vị Trong Nhà (IPS)  
 > **Phương pháp:** AutoLoC (Large Language Model-based Zero-Shot Indoor Positioning System)  
 > **Mô hình triển khai:** Local LLM qua Ollama API (`llama3.2:1b` / `phi3:mini`)  
 > **Tập dữ liệu:** UJIIndoorLoc (520 Wi-Fi Access Points, 3 Tòa nhà, 4-5 Tầng)  
-> **Nhánh Git:** `feature/llm-autoloc-ips`  
 
 ---
 

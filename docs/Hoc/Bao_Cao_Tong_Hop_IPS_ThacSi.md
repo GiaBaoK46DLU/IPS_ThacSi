@@ -158,3 +158,4 @@ Khảo sát toàn diện trên 3,912 mẫu Validation cho thấy:
 
 * **Ensemble Lai ghép (Hierarchical + LLM):** Sử dụng Random Forest để chốt tuyệt đối Tòa nhà (99.91%), sau đó dùng AutoLoC LLM để xử lý các điểm nghi ngờ rò rỉ tầng nhạy cảm và KNN Manhattan để tinh chỉnh tọa độ vi mô.
 * **Đóng gói báo cáo Luận văn:** Xuất biểu đồ CDF sai số, ma trận nhầm lẫn 13 cặp Tòa/Tầng sang định dạng vector đồ họa để đưa vào bản thảo luận văn chính thức.
+
