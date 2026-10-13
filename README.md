@@ -1,8 +1,9 @@
 # IPS dùng chung: KAN-Mixer, LLM và HUIM
 
 Dự án Python/PyTorch trên UJIIndoorLoc cho nhóm ba người. Thuật toán đã chạy được trong dự án chung:
-**KAN-Mixer dùng efficient-kan B-spline**. LLM/HUIM có adapter trừu tượng để nhóm phát triển tiếp,
-chưa được đăng ký như thuật toán dự đoán IPS hoàn chỉnh. FastKAN/S-KAN chưa được triển khai.
+**KAN-Mixer dùng efficient-kan B-spline** và **HUIM: EFIM chọn AP + k-NN chọn trên validation**
+(ID `huim`). LLM có adapter trừu tượng để nhóm phát triển tiếp, chưa được đăng ký như thuật toán
+dự đoán IPS hoàn chỉnh. FastKAN/S-KAN chưa được triển khai.
 
 MLP và MLP-Mixer là phần học/so sánh cá nhân, không hiển thị trong Factory hoặc CLI của dự án chung.
 
@@ -22,7 +23,11 @@ src/ips/
       tests/                   tests mạng, tensor, checkpoint KAN
       README.md                hướng dẫn review KAN
     llm/adapter.py             hợp đồng LLM trừu tượng
-    huim/adapter.py            hợp đồng HUIM trừu tượng
+    huim/                      HUIM: adapter.py (hợp đồng) + algorithm.py (HUIMKNNAlgorithm)
+      efim.py / utility.py     khai phá EFIM, q(i,T), p(i) Model A/B/C
+      positioning.py           k-NN, các bước chọn S0–S4 trên validation
+      configs/ tests/          experiment_smoke/validation.json; tests EFIM và vòng đời
+      README.md                hướng dẫn nhánh HUIM
   data_access/                 CSV, NumPy, nguồn/row index, split và audit
   experiments/                 config/result, factory, runner, evaluator, exporter
   data.py / metrics.py         schema/RSSI và metric IPS dùng chung
@@ -66,6 +71,13 @@ Factory:
 .\.venv\Scripts\python.exe -u -m ips run --config src/ips/algorithms/kan/configs/experiment_smoke.json
 # Terminal khác để theo dõi epoch
 Get-Content runs/kan_folder_smoke/terminal.log -Tail 20 -Wait
+```
+
+HUIM (không cần GPU; xem [hướng dẫn HUIM](src/ips/algorithms/huim/README.md)):
+
+```powershell
+.\.venv\Scripts\python.exe -u -m ips run --config src/ips/algorithms/huim/configs/experiment_smoke.json
+.\.venv\Scripts\python.exe -u -m ips run --config src/ips/algorithms/huim/configs/experiment_validation.json
 ```
 
 Chạy lại phải đổi output_dir sang đường dẫn chưa tồn tại. Smoke một epoch trên subset256/128 chỉ kiểm tra pipeline.
