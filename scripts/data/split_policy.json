@@ -1,0 +1,88 @@
+{
+  "development_file": "data/raw/ujiindoorloc/trainingData.csv",
+  "final_test_file": "data/raw/ujiindoorloc/validationData.csv",
+  "class_pairs": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ]
+  ],
+  "split": {
+    "state": "not_materialized",
+    "method": "StratifiedGroupKFold",
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 2026,
+    "validation_fold_index": 0,
+    "stratification_target": "joint_building_floor",
+    "group_key_columns": [
+      "USERID",
+      "PHONEID",
+      "BUILDINGID",
+      "FLOOR",
+      "LONGITUDE",
+      "LATITUDE",
+      "SPACEID",
+      "RELATIVEPOSITION"
+    ],
+    "required_checks": [
+      "group_disjointness",
+      "all_13_classes_in_train_and_validation",
+      "duplicate_audit",
+      "saved_original_row_indices",
+      "csv_hashes"
+    ],
+    "interpretation": "heldout_measurement_groups_not_strictly_unseen_users_or_locations"
+  },
+  "preprocessing": {
+    "coordinate_scale_minimum": 1e-06
+  }
+}

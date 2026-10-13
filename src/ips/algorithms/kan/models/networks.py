@@ -75,6 +75,12 @@ def build_model(config: dict, classes: int = 13) -> nn.Module:
             raise ValueError("Pinned IPS protocol uses the efficient-kan SiLU base activation.")
         if config["kan"]["update_grid"] or config["kan"]["extra_regularization_loss_coefficient"] != 0:
             raise ValueError("Protocol v1 fixes grid and uses no extra KAN regularization loss.")
+        variant = config.get("positioning", {}).get("variant", "regression_v1")
+        if variant == "reference":
+            from .reference import ReferenceKANMixer
+            return ReferenceKANMixer(config, classes)
+        if variant != "regression_v1":
+            raise ValueError(f"Unknown KAN positioning variant: {variant}")
         return RSSIMixer(config["mixer"], classes, config["kan"])
     raise ValueError(f"Unknown model: {name}")
 

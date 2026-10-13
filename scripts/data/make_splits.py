@@ -13,7 +13,7 @@ from sklearn.model_selection import StratifiedGroupKFold
 from data_utils import (AP_COLUMNS, GROUP_COLUMNS, OUTPUT, RAW, ROOT, csv_bytes,
                         encode_groups, json_bytes, overlaps, read_data, sha256, write_bundle)
 
-DESIGN = ROOT / "docs" / "lessons" / "chang_04" / "experiment_design.json"
+DESIGN = Path(__file__).with_name("split_policy.json")
 
 
 def main():

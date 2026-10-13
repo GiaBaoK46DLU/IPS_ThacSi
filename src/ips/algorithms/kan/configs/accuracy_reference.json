@@ -1,0 +1,63 @@
+{
+  "model": "kan_mixer",
+  "split_dir": "data/processed/uji_group_split_v1",
+  "architecture_reference": "https://arxiv.org/abs/2503.08939v1",
+  "mixer": {
+    "tokens": 26,
+    "features_per_token": 40,
+    "channels": 64,
+    "blocks": 2,
+    "token_hidden": 32,
+    "channel_hidden": 128,
+    "dropout": 0.1
+  },
+  "kan": {
+    "basis": "B_spline",
+    "grid_size": 5,
+    "spline_order": 3,
+    "base_activation": "SiLU",
+    "enable_standalone_scale_spline": true,
+    "grid_range": [
+      -3,
+      3
+    ],
+    "scale_noise": 0.1,
+    "scale_base": 1.0,
+    "scale_spline": 1.0,
+    "grid_eps": 0.02,
+    "update_grid": false,
+    "extra_regularization_loss_coefficient": 0,
+    "required_diagnostic": "input_distribution_and_out_of_knot_support_fraction_per_KANLinear",
+    "note": "RSSI_variant_design_not_claimed_to_be_Canuto_paper_hyperparameters"
+  },
+  "loss": {
+    "smooth_l1_beta": 1.0,
+    "lambda_xy": 3.0,
+    "lambda_class": 0.5,
+    "lambda_reference": 1.0,
+    "label_smoothing": 0.0
+  },
+  "training": {
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 128,
+    "max_epochs": 100,
+    "patience": 25,
+    "min_delta": 0.01,
+    "gradient_clip_l2": 1.0,
+    "threads": 2,
+    "kan_diagnostic_batches": 0,
+    "scheduler": "cosine"
+  },
+  "positioning": {
+    "variant": "reference",
+    "pooling": "flatten",
+    "head_width": 256,
+    "mask_scale": 0.0,
+    "top_k": 5,
+    "temperature": 1.0,
+    "rssi_noise_db": 1.5,
+    "device_shift_db": 1.5,
+    "ap_dropout": 0.02
+  }
+}

@@ -76,6 +76,8 @@ class KANMixerAlgorithm(Algorithm):
         self._device = device
         self._model, self._checkpoint = load_checkpoint(path, device)
         checkpoint, info = self._checkpoint, self._train.info
+        if checkpoint.get("metadata", {}).get("full_development_refit") and "validation" in self.config.evaluation_splits:
+            raise ValueError("Final refit incorporated validation into training; request test-only evaluation.")
         if (checkpoint["config"]["model"] != self.model_id or checkpoint["ap_order"] != info.ap_order or
                 checkpoint["classes"] != info.classes or checkpoint["preprocessing"] != info.preprocessing or
                 checkpoint["split_manifest_sha256"] != sha256(info.directory/"manifest.json")):
@@ -111,6 +113,12 @@ class KANMixerAlgorithm(Algorithm):
         mixer = settings["mixer"]
         backbone = (f"efficient-kan B-spline: {mixer['tokens']} tokens, {mixer['channels']} channels, "
                     f"{mixer['blocks']} blocks")
+        if settings.get("positioning", {}).get("variant") == "reference":
+            backbone += f"; {len(settings['positioning']['references'])} train reference points"
+        if "ensemble_members" in self._checkpoint:
+            backbone += f"; ensemble of {len(self._checkpoint['ensemble_members'])} KAN-Mixers"
+        if "fingerprint_refinement" in self._checkpoint:
+            backbone += "; explicit hybrid with train-only fingerprint retrieval"
         return ModelDiagram('flowchart LR\n    A["520 AP: RSSI + mask"] --> B["'+backbone+
             f'"]\n    B --> C["{len(self._checkpoint["classes"])} logits: building/floor"]'
             '\n    B --> D["2 coordinates: inverse to metres"]\n', "mermaid")

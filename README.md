@@ -29,12 +29,12 @@ src/ips/
   cli.py / __main__.py         điểm vào lệnh
 data/raw/ujiindoorloc/          CSV gốc
 data/processed/                split, preprocessing, AP order, mapping, manifest
-docs/architecture/             hợp đồng và sơ đồ nhóm
-docs/lessons/chang_05/          chuẩn bị/audit dữ liệu dùng chung
+scripts/data/                  tải/audit/tạo/kiểm split dùng chung
 scripts/setup_cuda.ps1         thiết lập môi trường GPU
 tests/                         tests chung và discovery tests KAN
 personal_learning/             baseline cá nhân; ignored
   archive/workspace/           tài liệu, config, reports, scripts cũ; giữ nguyên nội dung
+docs/ / references/            tài liệu và bài báo cá nhân; ignored, không có trong clone mới
 runs/                          checkpoint/log/output; ignored
 ```
 
@@ -53,7 +53,7 @@ Từ root repo, trên máy mới:
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 # Nếu chưa có CSV: tải từ nguồn UCI qua script dữ liệu
-.\.venv\Scripts\python.exe docs/lessons/chang_05/download_data.py
+.\.venv\Scripts\python.exe scripts/data/download_data.py
 .\.venv\Scripts\python.exe -m ips prepare --verify-only
 .\.venv\Scripts\python.exe -m ips algorithms
 .\.venv\Scripts\python.exe -m ips check --device cpu
@@ -115,9 +115,11 @@ Không đổi số liệu báo cáo cũ để phù hợp cấu trúc mới.
 
 ## Hợp đồng và nguồn
 
-Xem [kiến trúc nhóm](docs/architecture/shared_factory.md), [sơ đồ](docs/architecture/shared_factory.png)
-và [kiểm chứng KAN-only](docs/architecture/kan_only_verification.md).
-Việc gom thư mục và dọn alias được kiểm chứng tại [KAN layout](docs/architecture/kan_layout_verification.md).
+Hợp đồng nhóm nằm trong [Algorithm](src/ips/algorithms/base.py),
+[kiểu dữ liệu thực nghiệm](src/ips/experiments/contracts.py) và các adapter trong `src/ips/algorithms/`.
+Xem [hướng dẫn KAN](src/ips/algorithms/kan/README.md) và [công cụ dữ liệu](scripts/data/README.md).
+Toàn bộ `docs/` và `references/` được bỏ tracking, giữ nguyên trên máy; clone mới không cần chúng
+để chạy pipeline. `prepare` chỉ tạo split nếu chưa có manifest, tránh đổi provenance/hash lịch sử.
 Dataset vẫn giữ520 AP,13 cặp tòa/tầng, split16025/3912/1111 và preprocessing chỉ fit internal train.
 Tọa độ theo quy ước mét của UJIIndoorLoc; chưa xác minh đầy đủ CRS. Dataset:
 [UCI UJIIndoorLoc](https://archive.ics.uci.edu/dataset/310/ujiindoorloc), CC BY4.0.

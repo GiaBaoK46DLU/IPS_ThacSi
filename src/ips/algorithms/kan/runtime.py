@@ -44,6 +44,10 @@ def read_config(path: Path) -> dict:
         train["learning_rate"] <= 0 or train["weight_decay"] < 0 or train["gradient_clip_l2"] <= 0 or
         config["loss"]["lambda_xy"] < 0 or config["loss"]["smooth_l1_beta"] <= 0):
         raise ValueError("Invalid training/loss hyperparameters.")
+    if config["loss"].get("reference_sigma_normalized", 0) < 0:
+        raise ValueError("Reference spatial smoothing radius must be nonnegative.")
+    if train.get("scheduler") not in (None, "cosine"):
+        raise ValueError("Supported scheduler: cosine (or omit for constant learning rate).")
     return config
 
 
@@ -67,9 +71,21 @@ def code_hashes():
 def load_checkpoint(path, device):
     # Payload chỉ gồm state_dict, tensor và kiểu primitive: weights_only=True.
     checkpoint = torch.load(path, map_location="cpu", weights_only=True)
-    if checkpoint.get("format_version") != 1:
+    if checkpoint.get("format_version") not in (1, 2):
         raise ValueError("Unsupported checkpoint format.")
-    model = build_model(checkpoint["config"], len(checkpoint["classes"]))
-    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    if "ensemble_members" in checkpoint:
+        from .models.ensemble import EnsembleReferenceKANMixer
+        members = []
+        for member in checkpoint["ensemble_members"]:
+            network = build_model(member["config"], len(checkpoint["classes"]))
+            network.load_state_dict(member["model_state_dict"], strict=True)
+            members.append(network)
+        model = EnsembleReferenceKANMixer(members, checkpoint["ensemble_confidence_weighted"])
+    else:
+        model = build_model(checkpoint["config"], len(checkpoint["classes"]))
+        model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    if "fingerprint_refinement" in checkpoint:
+        from .models.refinement import RefinedKANMixer
+        model = RefinedKANMixer(model, checkpoint["fingerprint_refinement"])
     model.to(device).eval()
     return model, checkpoint

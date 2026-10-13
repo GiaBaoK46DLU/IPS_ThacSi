@@ -11,4 +11,4 @@ phải dự đoán IPS nếu thiếu decoder vị trí.
 Nhóm cần chốt model, RSSI/AP/missing serialization, few-shot/retrieval, fine-tune/inference, decoding,
 phản hồi không hợp lệ và model revision/seed/token/runtime/memory. Sau khi có concrete Algorithm thật
 và tests, đăng ký qua registry riêng. Adapter này không được đăng ký trong default_factory.
-Xem [kiến trúc chung](../../../../docs/architecture/shared_factory.md).
+Xem [hợp đồng Algorithm](../base.py) và [kiểu dữ liệu chung](../../experiments/contracts.py).
