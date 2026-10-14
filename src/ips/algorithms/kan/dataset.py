@@ -11,6 +11,7 @@ from ...data_access import FingerprintSplit
 
 class FingerprintDataset(Dataset):
     def __init__(self, data, indices, preprocessing, classes):
+        self.split_name = "unspecified"
         self.features = torch.from_numpy(feature_transform(data.rssi[indices]))
         self.indices = torch.as_tensor(indices.copy(), dtype=torch.int64)
         self.xy_original = data.metadata[indices, :2].copy()  # keep float64 for metre metrics
@@ -26,6 +27,7 @@ class FingerprintDataset(Dataset):
     @classmethod
     def from_split(cls, split: FingerprintSplit):
         instance = cls.__new__(cls)
+        instance.split_name = split.name
         instance.features = torch.from_numpy(feature_transform(split.inputs.rssi))
         instance.indices = torch.as_tensor(split.inputs.row_indices.copy(), dtype=torch.int64)
         instance.xy_original = split.xy.copy()

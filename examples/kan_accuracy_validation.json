@@ -1,0 +1,16 @@
+{
+  "algorithm_id": "kan_mixer",
+  "params": {
+    "model_config": "src/ips/algorithms/kan/configs/accuracy_spatial.json"
+  },
+  "split_dir": "data/processed/uji_group_split_v1",
+  "task": "position",
+  "seed": 42,
+  "device": "cuda",
+  "smoke": false,
+  "evaluation_splits": [
+    "validation"
+  ],
+  "export_plots": true,
+  "output_dir": "runs/kan_accuracy_factory_validation"
+}

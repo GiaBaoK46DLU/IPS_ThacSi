@@ -17,6 +17,9 @@ diagram-design/
 
 # Personal baseline study and archives: kept locally.
 /personal_learning/
+# Documentation and research references are personal, retained on this machine.
+/docs/
+/references/
 # Guard former personal paths if historical files are restored manually.
 /configs/base.json
 /configs/experiments/mlp_smoke.json

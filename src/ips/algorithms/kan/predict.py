@@ -53,6 +53,8 @@ def evaluate(checkpoint_path: Path, split_dir: Path, split: str, output_dir: Pat
     device = configure_runtime(0, device_name)
     model, checkpoint = load_checkpoint(checkpoint_path, device)
     bundle = load_bundle(split_dir)
+    if split == "validation" and checkpoint.get("metadata", {}).get("full_development_refit"):
+        raise ValueError("Validation was incorporated into the final training refit; it cannot be reported as held out.")
     if sha256(bundle.directory / "manifest.json") != checkpoint["split_manifest_sha256"]:
         raise ValueError("Checkpoint and split manifest differ.")
     if (bundle.preprocessing != checkpoint["preprocessing"] or bundle.classes != checkpoint["classes"] or

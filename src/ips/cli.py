@@ -62,15 +62,22 @@ def main(argv=None):
         except (ValueError, NotImplementedError, FileExistsError) as error:
             parser.error(str(error))
     elif args.command == "prepare":
-        scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py", "make_splits.py", "verify_splits.py"]
+        scripts = ["verify_splits.py"] if args.verify_only else ["inspect_data.py"]
+        if not args.verify_only:
+            if not (OUTPUT / "manifest.json").is_file():
+                scripts.append("make_splits.py")
+            scripts.append("verify_splits.py")
         for name in scripts:
-            subprocess.run([sys.executable, str(ROOT / "docs/lessons/chang_05" / name)], check=True)
+            subprocess.run([sys.executable, str(ROOT / "scripts/data" / name)], check=True)
     elif args.command == "check":
         import torch
         from .algorithms.kan.dataset import FingerprintDataset
         config = read_config(args.config)
         device = configure_runtime(42, args.device, config["training"]["threads"])
         bundle = load_bundle(ROOT / config["split_dir"])
+        if config.get("positioning", {}).get("variant") == "reference":
+            from .algorithms.kan.models.reference import fit_reference_points
+            fit_reference_points(config, FingerprintDataset.from_split(bundle.split("train")))
         features = FingerprintDataset.from_split(bundle.split("train", limit=2)).features.to(device)
         counts = {}
         for name in ["kan_mixer"]:
