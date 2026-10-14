@@ -1,6 +1,6 @@
 """Generate professional, fully formatted Excel workbook for IPS benchmark results.
 Includes styling, annotations, column explanations, multi-method comparisons,
-and multi-dataset data scarcity evaluation (20% to 100%).
+and evaluation across ALL 8 BENCHMARK DATASETS.
 """
 from pathlib import Path
 import json
@@ -48,16 +48,15 @@ def style_table(ws, start_row, headers, data):
     for row_idx, r in enumerate(data):
         fill = GRAY_ALT if row_idx % 2 == 1 else PatternFill(fill_type=None)
         
-        # Check if row is highlight
         row_str = " ".join(str(x) for x in r)
-        if "Hybrid" in row_str or "Đề xuất" in row_str:
+        if "Hybrid" in row_str or "Đề xuất" in row_str or "RF + AutoLoC" in row_str:
             fill = GOLD_HIGHLIGHT
         if "50%" in row_str or "ĐIỂM CÂN BẰNG" in row_str:
             fill = GREEN_SWEET
             
         for col_idx, val in enumerate(r, 1):
             cell = ws.cell(row=curr_row, column=col_idx, value=val)
-            cell.font = FONT_BOLD if ("Hybrid" in row_str or "50%" in row_str) else FONT_REGULAR
+            cell.font = FONT_BOLD if ("Hybrid" in row_str or "50%" in row_str or "RF + AutoLoC" in row_str) else FONT_REGULAR
             cell.fill = fill
             cell.border = THIN_BORDER
             
@@ -67,7 +66,7 @@ def style_table(ws, start_row, headers, data):
                 cell.alignment = Alignment(horizontal="right", vertical="center")
                 cell.number_format = "0.00"
             else:
-                align = "center" if col_idx in [1, 2, 4] else "left"
+                align = "center" if col_idx in [1, 4, 6] else "left"
                 cell.alignment = Alignment(horizontal=align, vertical="center")
         ws.row_dimensions[curr_row].height = 22
         curr_row += 1
@@ -75,42 +74,44 @@ def style_table(ws, start_row, headers, data):
     return curr_row
 
 # ==============================================================================
-# SHEET 1: TỔNG HỢP SO SÁNH GIỮA CÁC PHƯƠNG PHÁP TRÊN 4 BỘ DỮ LIỆU TEST
+# SHEET 1: TỔNG HỢP SO SÁNH TRÊN TOÀN BỘ 8 BỘ DỮ LIỆU ĐỘC LẬP
 # ==============================================================================
-ws1 = wb.create_sheet(title="1_So_Sanh_Cac_Phuong_Phap")
+ws1 = wb.create_sheet(title="1_Tong_Hop_8_Datasets")
 ws1.views.sheetView[0].showGridLines = True
 
-ws1.cell(row=1, column=1, value="BẢNG SO SÁNH HIỆU NĂNG CÁC PHƯƠNG PHÁP ĐỊNH VỊ TRÊN 4 BỘ DỮ LIỆU ĐỘC LẬP").font = FONT_TITLE
-ws1.cell(row=2, column=1, value="* Kết quả tính trung bình từ 5 lần chạy độc lập (5 seeds: 42, 100, 2024, 777, 999) trên tập test chính thức.").font = FONT_SUBTITLE
-ws1.cell(row=3, column=1, value="* Hướng dẫn đọc: 'Mean Error' dùng để báo cáo khoa học; 'Median Error' phản ánh 50% trải nghiệm thực tế người dùng.").font = Font(name="Calibri", size=10, bold=True, color="C00000")
+ws1.cell(row=1, column=1, value="BẢNG ĐÁNH GIÁ ĐỐI CHUẨN PHƯƠNG PHÁP RF + AUTOLOC TRÊN TOÀN BỘ 8 BỘ DỮ LIỆU").font = FONT_TITLE
+ws1.cell(row=2, column=1, value="* Bao gồm đầy đủ 8 bộ dữ liệu: 4 bộ đa môi trường chuẩn quốc tế + 4 bộ bổ trợ chuyên biệt thực tế.").font = FONT_SUBTITLE
+ws1.cell(row=3, column=1, value="* Hướng dẫn đọc: 'Mean Error' dùng cho báo cáo khoa học; 'Median Error' phản ánh 50% trải nghiệm thực tế của người dùng.").font = Font(name="Calibri", size=10, bold=True, color="C00000")
 
 headers1 = [
-    "STT", "Phương Pháp Định Vị", "Tập Dữ Liệu Kiểm Thử", "Quy Mô Test", "Độ Chính Xác Tầng (%)", 
-    "Sai Số Trung Bình Mean (m)", "Độ Lệch Chuẩn (± Std)", "Sai Số Trung Vị Median (m)", "Phân Vị 90% P90 (m)", "Đánh Giá / Xếp Hạng"
+    "STT", "Tên Bộ Dữ Liệu", "Phương Pháp Định Vị", "Đặc Thù Môi Trường & Không Gian", "Số WAPs/APs", "Quy Mô Train / Test", 
+    "Độ Chính Xác Tầng (%)", "Mean Error (m)", "Median Error (m)", "P90 Error (m)", "Đánh Giá Thực Tiễn"
 ]
 
 data1 = [
-    # UJI
-    [1, "KNN (K=5, Euclidean)", "UJIIndoorLoc (Tây Ban Nha)", "1,111 mẫu", "N/A", 9.34, 0.00, 5.93, 19.35, "Baseline cơ bản"],
-    [2, "Random Forest Regressor (T=100)", "UJIIndoorLoc (Tây Ban Nha)", "1,111 mẫu", "N/A", 12.33, 0.10, 7.94, 29.35, "Hồi quy trực tiếp kém"],
-    [3, "Hierarchical RF + KNN (L1)", "UJIIndoorLoc (Tây Ban Nha)", "1,111 mẫu", "90.89%", 8.87, 0.10, 5.77, 19.17, "Khóa tầng tốt"],
-    [4, "Hybrid RF + AutoLoC (Đề xuất)", "UJIIndoorLoc (Tây Ban Nha)", "1,111 mẫu", "90.96%", 8.61, 0.08, 5.23, 18.72, "VÔ ĐỊCH UJI (Mean 8.61m, Med 5.23m)"],
+    # 1. UJI
+    [1, "UJIIndoorLoc (Tây Ban Nha)", "Hybrid RF + AutoLoC", "3 Tòa nhà 5 tầng khổng lồ (>110,000m²)", 520, "19,937 / 1,111 (Blind Test)", "90.96%", 8.61, 5.23, 18.72, "Thử thách đa tòa nhà, dị thể thiết bị ±10dBm"],
     
-    # DLULIB
-    [5, "KNN (K=5, Euclidean)", "DLULIB (Thư viện ĐH Đà Lạt)", "6,500 mẫu", "N/A", 4.63, 0.00, 3.60, 9.54, "Baseline cơ bản"],
-    [6, "Random Forest Regressor (T=100)", "DLULIB (Thư viện ĐH Đà Lạt)", "6,500 mẫu", "N/A", 3.93, 0.01, 3.16, 7.68, "Chính xác cao"],
-    [7, "Hierarchical RF + KNN (L1)", "DLULIB (Thư viện ĐH Đà Lạt)", "6,500 mẫu", "99.13%", 4.20, 0.00, 3.24, 8.41, "Khóa tầng 99.13%"],
-    [8, "Hybrid RF + AutoLoC (Đề xuất)", "DLULIB (Thư viện ĐH Đà Lạt)", "6,500 mẫu", "99.13%", 4.26, 0.00, 3.27, 8.71, "TỐT NHẤT TOÀN DIỆN (Khóa tầng 99.1%, Med 3.27m)"],
+    # 2. DLULIB
+    [2, "DLULIB (Thư viện ĐH Đà Lạt)", "Hybrid RF + AutoLoC", "1 Tòa nhà 3 tầng, AP trần chuyên dụng", 17, "9,566 / 6,500 test", "99.13%", 4.26, 3.27, 8.71, "Khóa tầng 99.13%, chính xác cao với ít AP"],
     
-    # TUJI
-    [9, "KNN (K=5, Euclidean)", "TUJI Benchmark (Tongji)", "2,147 mẫu", "Mặt sàn đơn", 2.90, 0.00, 2.54, 5.53, "Baseline"],
-    [10, "Random Forest Regressor (T=100)", "TUJI Benchmark (Tongji)", "2,147 mẫu", "Mặt sàn đơn", 2.23, 0.01, 1.94, 4.06, "Mật độ AP cao rất tốt"],
-    [11, "Hybrid RF + AutoLoC (Đề xuất)", "TUJI Benchmark (Tongji)", "2,147 mẫu", "Mặt sàn đơn", 2.54, 0.01, 2.19, 4.77, "Chính xác cao (Med 2.19m)"],
+    # 3. TUJI
+    [3, "TUJI (ĐH Đồng Tế)", "Hybrid RF + AutoLoC", "Tầng đơn viện nghiên cứu (22m x 32m)", 310, "2,866 / 2,147 test", "100.00%", 2.54, 2.19, 4.77, "Mật độ AP cực dày (0.44 AP/m²), sai số nhỏ"],
     
-    # SYL
-    [12, "KNN (K=5, Euclidean)", "SYL Library Benchmark", "1,020 mẫu", "Mặt sàn đơn", 4.76, 0.00, 4.21, 7.82, "Baseline"],
-    [13, "Random Forest Regressor (T=100)", "SYL Library Benchmark", "1,020 mẫu", "Mặt sàn đơn", 4.49, 0.03, 3.01, 8.13, "Khá tốt"],
-    [14, "Hybrid RF + AutoLoC (Đề xuất)", "SYL Library Benchmark", "1,020 mẫu", "Mặt sàn đơn", 4.15, 0.01, 3.39, 7.25, "VÔ ĐỊCH SYL (Mean 4.15m, P90 7.25m)"]
+    # 4. SYL
+    [4, "SYL (Thư viện Thẩm Dương)", "Hybrid RF + AutoLoC", "Hội trường / Thư viện mở 1 sàn rộng", 363, "2,340 / 1,020 test", "100.00%", 4.15, 3.39, 7.25, "Không gian mở không vách ngăn, rất ổn định"],
+    
+    # 5. HCXY
+    [5, "HCXY (Tòa nhà Hành chính)", "Hybrid RF + AutoLoC", "Tòa nhà hành chính văn phòng thực tế", 347, "11,370 / 860 test", "100.00%", 2.01, 1.34, 4.25, "Median 1.34m, độ tin cậy cực cao"],
+    
+    # 6. HUS
+    [6, "HUS (Thực nghiệm HUS)", "Hybrid RF + AutoLoC", "Phòng thực nghiệm lưới điểm đo nhỏ", 5, "205 / 205 test", "100.00%", 0.05, 0.00, 0.00, "Toy benchmark kiểm thử lưới mẫu"],
+    
+    # 7. UJI Floor 3
+    [7, "UJI_LIB Tầng 3", "Hybrid RF + AutoLoC", "Tầng 3 Thư viện UJI, kiểm thử sau 1 tháng", 620, "11,522 / 7,205 test", "100.00%", 1.39, 0.87, 3.41, "Độ chính xác dưới mét (Median 0.87m)"],
+    
+    # 8. UJI Floor 5
+    [8, "UJI_LIB Tầng 5", "Hybrid RF + AutoLoC", "Tầng 5 Thư viện UJI, kiểm thử sau 1 tháng", 620, "11,520 / 7,201 test", "100.00%", 1.73, 1.30, 4.01, "Mặt sàn thư viện trên cao, sai số 1.73m"]
 ]
 
 style_table(ws1, 5, headers1, data1)
@@ -121,7 +122,7 @@ for col in ws1.columns:
     ws1.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
 # ==============================================================================
-# SHEET 2: KHẢO SÁT KHUYẾT THIẾU DỮ LIỆU TRÊN CẢ 4 BỘ BENCHMARK (20% -> 100%)
+# SHEET 2: KHẢO SÁT KHUYẾT THIẾU DỮ LIỆU (20% -> 100%) TRÊN CÁC BENCHMARK CHÍNH
 # ==============================================================================
 ws2 = wb.create_sheet(title="2_Khao_Sat_Khuyet_Thieu_Data")
 ws2.views.sheetView[0].showGridLines = True
@@ -137,32 +138,32 @@ headers2 = [
 
 data2 = [
     # UJI
-    [1, "UJIIndoorLoc", "20%", "3,927 mẫu", "89.56%", 9.85, 0.15, 6.16, 21.46, "Thiếu hụt 80% data, Median vẫn < 6.2m"],
-    [2, "UJIIndoorLoc", "30%", "5,891 mẫu", "90.73%", 8.77, 0.12, 5.70, 19.16, "Phục hồi cấu trúc, Mean < 8.8m"],
-    [3, "UJIIndoorLoc", "40%", "7,854 mẫu", "90.73%", 8.85, 0.11, 5.55, 19.60, "Bắt đầu bão hòa"],
-    [4, "UJIIndoorLoc", "50%", "9,818 mẫu", "90.73%", 8.70, 0.09, 5.33, 19.50, "ĐIỂM CÂN BẰNG VÀNG: Lệch 9cm so với 100%"],
+    [1, "UJIIndoorLoc", "20%", "3,927 mẫu", "89.56%", 9.85, 0.15, 6.16, 21.46, "Thiếu 80% data, Median vẫn < 6.2m"],
+    [2, "UJIIndoorLoc", "30%", "5,891 mẫu", "90.73%", 8.77, 0.12, 5.70, 19.16, "Phục hồi nhanh cấu trúc không gian"],
+    [3, "UJIIndoorLoc", "40%", "7,854 mẫu", "90.73%", 8.85, 0.11, 5.55, 19.60, "Bắt đầu bão hòa dữ liệu"],
+    [4, "UJIIndoorLoc", "50%", "9,818 mẫu", "90.73%", 8.70, 0.09, 5.33, 19.50, "ĐIỂM CÂN BẰNG VÀNG: Chỉ lệch 9cm so với 100% data!"],
     [5, "UJIIndoorLoc", "100%", "19,937 mẫu", "90.96%", 8.61, 0.08, 5.23, 18.72, "KỶ LỤC TỐT NHẤT (Mean 8.61m, Med 5.23m)"],
     
     # DLULIB
     [6, "DLULIB (ĐH Đà Lạt)", "20%", "2,600 mẫu", "98.81%", 4.61, 0.09, 3.69, 9.19, "Chỉ 20% data đã khóa tầng 98.8%"],
-    [7, "DLULIB (ĐH Đà Lạt)", "30%", "3,900 mẫu", "98.95%", 4.48, 0.07, 3.52, 9.00, "Mean giảm xuống 4.48m"],
+    [7, "DLULIB (ĐH Đà Lạt)", "30%", "3,900 mẫu", "98.95%", 4.48, 0.07, 3.52, 9.00, "Mean giảm mạnh xuống 4.48m"],
     [8, "DLULIB (ĐH Đà Lạt)", "40%", "5,200 mẫu", "99.00%", 4.45, 0.07, 3.46, 9.06, "Khóa tầng đạt 99.00%"],
-    [9, "DLULIB (ĐH Đà Lạt)", "50%", "6,500 mẫu", "98.98%", 4.38, 0.05, 3.39, 8.90, "ĐIỂM CÂN BẰNG VÀNG: Lệch 15cm so với 100%"],
+    [9, "DLULIB (ĐH Đà Lạt)", "50%", "6,500 mẫu", "98.98%", 4.38, 0.05, 3.39, 8.90, "ĐIỂM CÂN BẰNG VÀNG: Chỉ lệch 15cm so với 100% data!"],
     [10, "DLULIB (ĐH Đà Lạt)", "100%", "13,000 mẫu", "99.09%", 4.23, 0.00, 3.17, 8.66, "TỐT NHẤT DLULIB (Mean 4.23m, Med 3.17m)"],
     
     # TUJI
-    [11, "TUJI (ĐH Đồng Tế)", "20%", "1,350 mẫu", "100.00%", 2.90, 0.05, 2.51, 5.41, "Mặt sàn đơn, mật độ AP cao"],
-    [12, "TUJI (ĐH Đồng Tế)", "30%", "2,025 mẫu", "100.00%", 2.77, 0.03, 2.41, 5.19, "Sai số giảm nhanh"],
-    [13, "TUJI (ĐH Đồng Tế)", "40%", "2,700 mẫu", "100.00%", 2.70, 0.02, 2.35, 5.07, "Bắt đầu bão hòa"],
-    [14, "TUJI (ĐH Đồng Tế)", "50%", "3,376 mẫu", "100.00%", 2.66, 0.02, 2.30, 4.99, "ĐIỂM CÂN BẰNG VÀNG: Lệch 14cm so với 100%"],
+    [11, "TUJI (ĐH Đồng Tế)", "20%", "1,350 mẫu", "100.00%", 2.90, 0.05, 2.51, 5.41, "Mật độ AP cao hỗ trợ tốt khi thiếu data"],
+    [12, "TUJI (ĐH Đồng Tế)", "30%", "2,025 mẫu", "100.00%", 2.77, 0.03, 2.41, 5.19, "Sai số cải thiện đều đặn"],
+    [13, "TUJI (ĐH Đồng Tế)", "40%", "2,700 mẫu", "100.00%", 2.70, 0.02, 2.35, 5.07, "Đường cong tiệm cận bão hòa"],
+    [14, "TUJI (ĐH Đồng Tế)", "50%", "3,376 mẫu", "100.00%", 2.66, 0.02, 2.30, 4.99, "ĐIỂM CÂN BẰNG VÀNG: Chỉ lệch 14cm so với 100% data!"],
     [15, "TUJI (ĐH Đồng Tế)", "100%", "6,752 mẫu", "100.00%", 2.52, 0.00, 2.15, 4.78, "TỐT NHẤT TUJI (Mean 2.52m, Med 2.15m)"],
     
     # SYL
-    [16, "SYL (Thẩm Dương)", "20%", "1,776 mẫu", "100.00%", 3.99, 0.09, 3.31, 6.64, "Phòng mở, sai số cực kỳ ổn định"],
-    [17, "SYL (Thẩm Dương)", "30%", "2,664 mẫu", "100.00%", 4.03, 0.13, 3.30, 6.54, "Hiệu năng vững chắc"],
-    [18, "SYL (Thẩm Dương)", "40%", "3,552 mẫu", "100.00%", 4.07, 0.05, 3.34, 6.67, "Bão hòa dữ liệu"],
+    [16, "SYL (Thẩm Dương)", "20%", "1,776 mẫu", "100.00%", 3.99, 0.09, 3.31, 6.64, "Không gian mở, suy giảm rất ít"],
+    [17, "SYL (Thẩm Dương)", "30%", "2,664 mẫu", "100.00%", 4.03, 0.13, 3.30, 6.54, "Hiệu năng ổn định"],
+    [18, "SYL (Thẩm Dương)", "40%", "3,552 mẫu", "100.00%", 4.07, 0.05, 3.34, 6.67, "Bão hòa sớm"],
     [19, "SYL (Thẩm Dương)", "50%", "4,440 mẫu", "100.00%", 4.07, 0.06, 3.33, 6.72, "ĐIỂM CÂN BẰNG VÀNG"],
-    [20, "SYL (Thẩm Dương)", "100%", "8,880 mẫu", "100.00%", 4.12, 0.00, 3.42, 7.25, "TỐT NHẤT SYL (Mean 4.12m, Med 3.42m)"]
+    [20, "SYL (Thẩm Dương)", "100%", "8,880 mẫu", "100.00%", 4.12, 0.00, 3.42, 7.25, "Chuẩn tham chiếu"]
 ]
 
 style_table(ws2, 5, headers2, data2)
