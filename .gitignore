@@ -28,6 +28,9 @@ runs/
 /docs/lessons/chang_08/
 /references/course_materials/
 /reports/
+# Supplied datasets and generated audits stay on the owner's machine.
+/dataset/raw/
+/dataset/analysis/
 /src/ips/analysis.py
 /tests/test_evaluation.py
 /scripts/run_experiment.ps1
