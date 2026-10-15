@@ -109,8 +109,8 @@ def evaluate_uji_lib_floor(floor_num):
     df_te = load_xlsx_fast(f"{folder}/Test-01.xlsx")
 
     ap_cols = [c for c in df_tr.columns if c.startswith('AP') and c != 'AP']
-    X_tr_raw = df_tr[ap_cols].to_numpy(dtype=np.float32)
-    X_te_raw = df_te[ap_cols].to_numpy(dtype=np.float32)
+    X_tr_raw = np.nan_to_num(df_tr[ap_cols].to_numpy(dtype=np.float32), nan=100.0)
+    X_te_raw = np.nan_to_num(df_te[ap_cols].to_numpy(dtype=np.float32), nan=100.0)
 
     X_tr = np.maximum(0, np.where(X_tr_raw == 100, -110.0, X_tr_raw) + 110.0)
     X_te = np.maximum(0, np.where(X_te_raw == 100, -110.0, X_te_raw) + 110.0)
@@ -169,3 +169,4 @@ if __name__ == "__main__":
     with open("docs/Hoc/remaining_benchmarks_results.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print("ALL REMAINING DATASETS SAVED SUCCESSFULLY!")
+
