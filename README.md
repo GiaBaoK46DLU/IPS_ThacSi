@@ -36,6 +36,8 @@ personal_learning/             baseline cá nhân; ignored
   archive/workspace/           tài liệu, config, reports, scripts cũ; giữ nguyên nội dung
 docs/ / references/            tài liệu và bài báo cá nhân; ignored, không có trong clone mới
 runs/                          checkpoint/log/output; ignored
+dataset/                       README và công cụ audit các bộ được cung cấp
+  raw/ / analysis/             dữ liệu gốc và audit sinh ra; ignored
 ```
 
 Phần của thành viên KAN nằm trong [thư mục KAN](src/ips/algorithms/kan/README.md).
@@ -43,6 +45,14 @@ Review theo thứ tự algorithm.py → dataset.py → models/networks.py → tr
 Các alias backend tại đường dẫn cũ đã bỏ. Import Python dùng `ips.algorithms.kan.*`;
 lệnh CLI và checkpoint KAN v1 vẫn được hỗ trợ. `data_access` chỉ trả NumPy/split,
 không phụ thuộc mạng KAN hoặc tạo tensor.
+
+Nhánh thực nghiệm có adapter cho **DLULIB, HCXY, TUJI và SYL**; HCXY/SYL thuộc
+SODIndoorLoc và chạy model riêng theo site. Dùng cùng backbone/loss/train KAN
+với UJI, giữ train-only preprocessing/catalogue và split theo nhóm vị trí.
+Xem [bố trí dữ liệu](dataset/README.md) và
+[lệnh prepare/train/evaluate, xuất hình và kiểm chứng](src/ips/algorithms/kan/README.md).
+Pipeline này cần cấu hình/calibration UJI gốc cục bộ đã được chốt cho seed
+42/43/44; checkpoint và kết quả thực nghiệm trong `runs/` không có trong clone mới.
 
 ## Cài đặt và chạy
 
