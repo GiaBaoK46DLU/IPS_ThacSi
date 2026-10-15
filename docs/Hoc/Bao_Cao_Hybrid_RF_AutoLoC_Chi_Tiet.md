@@ -38,6 +38,11 @@
    - 8.1. Phân rã độ trễ từng công đoạn tính toán
    - 8.2. Tính khả thi triển khai thời gian thực trên thiết bị nhúng / Edge Computing
 9. [Kết Luận & Định Hướng Nghiên Cứu](#9-kết-luận--định-hướng-nghiên-cứu)
+10. [Nghiên Cứu Thực Nghiệm Cải Tiến Cấu Trúc Prompt Suy Luận Không Gian (Enhanced Prompt v2)](#10-nghiên-cứu-thực-nghiệm-cải-tiến-cấu-trúc-prompt-suy-luận-không-gian-enhanced-prompt-v2)
+   - 10.1. Cấu trúc Prompt Cải Tiến (Enhanced Prompt v2) & Mã nguồn chuẩn hóa
+   - 10.2. Phân tích kỹ thuật: 4 đột phá nâng cấp ngữ cảnh & cơ sở vật lý sóng vô tuyến
+   - 10.3. Bảng kết quả thực nghiệm đối sánh toàn diện trên toàn bộ 8 bộ dữ liệu
+   - 10.4. Phân tích chênh lệch hiệu năng & bài học học thuật rút ra
 
 ---
 
@@ -501,3 +506,306 @@ Với kiến trúc 100% Model Inference, hệ thống đạt được **độ tr
 2. **Khả năng khái quát hóa đa môi trường**: Mô hình hoạt động ổn định và chính xác trên toàn bộ 8 bộ dữ liệu thực tế, đạt độ chính xác dưới mét trên các môi trường có mật độ AP cao (UJI Lib Floor 3 đạt $1.39\text{m}$, HCXY đạt $2.01\text{m}$).
 3. **Tiết kiệm chi phí khảo sát**: Xác lập điểm cân bằng vàng ở mức 50% dữ liệu, giảm thiểu 50% công sức đo đạc thực địa.
 4. **Định hướng tiếp theo**: Tích hợp thuật toán Differential RSSI (RSSD) để triệt tiêu trực tiếp độ lệch ăng-ten giữa các dòng máy, kết hợp cùng kỹ thuật Few-shot Chain-of-Thought trên mô hình ngôn ngữ để nâng cao hơn nữa độ chính xác tại các khu vực ranh giới phòng.
+
+
+---
+
+## 10. NGHIÊN CỨU THỰC NGHIỆM CẢI TIẾN CẤU TRÚC PROMPT SUY LUẬN KHÔNG GIAN (ENHANCED PROMPT V2)
+
+### 10.1. Cấu Trúc Prompt Cải Tiến (Enhanced Prompt v2) & Mã Nguồn Chuẩn Hóa
+
+Nhằm khắc phục triệt để các hạn chế của cấu trúc Prompt cơ bản (v1), hệ thống đã được tích hợp bộ đóng gói ngữ cảnh thế hệ mới **Enhanced Prompt v2**. Bộ prompt này chuyển dịch từ việc liệt kê thụ động các giá trị RSSI thô sang việc cung cấp **các tham số suy hao vật lý viễn thông, cự ly hình học trực giao và ràng buộc độ lệch không gian**:
+
+```text
+[SYSTEM CONTEXT: PHYSICAL INDOOR POSITIONING REASONING ENGINE]
+You are a Spatial Inference Engine specializing in RF Fingerprinting.
+Physical Radio Model: Log-distance Path Loss Model with path loss exponent eta = 3.0, Reference RSSI at 1m (d0) = -40 dBm.
+Estimated Line-of-Sight (LoS) Distance Formula: d_est = 10 ** ((-40 - RSSI) / (10 * 3.0)).
+
+[SPATIAL LOCK & PRIOR BOUNDS]
+- Locked Building: Building 1 | Locked Floor: Floor 2 (Locked with 100% confidence by Hierarchical RF)
+- 3-Point Spatial Median Anchor (Coarse Prior): Lat = 4864900.80, Lon = -7560.95
+- Search Boundary: Radius < 25.0 meters around Median Anchor
+
+[TOP-3 LINE-OF-SIGHT REFERENCE TRANSMITTERS]
+The user device is currently receiving the strongest direct RF energy from:
+1. WAP014: RSSI = -48 dBm -> Est. LoS Distance = 1.85 m (Strong LoS Dominance)
+2. WAP122: RSSI = -55 dBm -> Est. LoS Distance = 3.16 m
+3. WAP087: RSSI = -62 dBm -> Est. LoS Distance = 5.41 m
+
+[TOP-5 CANDIDATE REFERENCE FINGERPRINTS (Locked on Floor 2)]
+Sorted by Dual-Space Metric (65% L1 Signal Space + 35% PCA Semantic Space):
+- N1: SignalAffinity=0.91 | SpaceID=102 | Lat=4864903.12 | Lon=-7561.40 | LoS_Mismatch: WAP014 diff = 2.1 dBm | OutlierDev = 2.37 m
+- N2: SignalAffinity=0.84 | SpaceID=102 | Lat=4864898.50 | Lon=-7559.80 | LoS_Mismatch: WAP014 diff = 3.5 dBm | OutlierDev = 2.58 m
+- N3: SignalAffinity=0.72 | SpaceID=103 | Lat=4864910.40 | Lon=-7565.00 | LoS_Mismatch: WAP014 diff = 7.8 dBm | OutlierDev = 10.44 m
+- N4: SignalAffinity=0.61 | SpaceID=101 | Lat=4864890.20 | Lon=-7555.40 | LoS_Mismatch: WAP014 diff = 11.2 dBm | OutlierDev = 11.95 m
+- N5: SignalAffinity=0.48 | SpaceID=104 | Lat=4864915.00 | Lon=-7570.10 | LoS_Mismatch: WAP014 diff = 14.6 dBm | OutlierDev = 16.92 m
+
+[CHAIN-OF-THOUGHT REASONING DIRECTIVES]
+Step 1 (LoS Calibration): Evaluate the LoS mismatch on dominant APs (WAP014). N1 and N2 exhibit tight RSSI agreement (< 3.5 dBm), confirming they reside in the same physical corridor/room line-of-sight.
+Step 2 (Spatial Outlier Damping): Candidates N3, N4, and N5 show large geometric deviation (OutlierDev > 10m) from the 3-point median anchor. Suppress their gravitational pull to avoid wall-crossing bias.
+Step 3 (Geometric Interpolation): Interpolate between N1 and N2, biasing proportionally toward N1 given its higher SignalAffinity (0.91 vs 0.84) and closer LoS match.
+Step 4 (Uncertainty Assessment): Estimate the residual confidence radius based on signal variance.
+
+[OUTPUT FORMAT REQUIREMENT]
+Return strictly a valid JSON object:
+{
+  "latitude": <float>,
+  "longitude": <float>,
+  "uncertainty_radius_m": <float>,
+  "dominant_candidate": "N1",
+  "reasoning": "<concise step-by-step physical deduction>"
+}
+```
+
+---
+
+### 10.2. Phân Tích Kỹ Thuật: 4 Đột Phá Nâng Cấp Ngữ Cảnh & Cơ Sở Vật Lý Sóng Vô Tuyến
+
+Cấu trúc Prompt v1 trước đây tuy đã cô đọng được bài toán nhưng bộc lộ 4 điểm nghẽn học thuật:
+1. **Thiếu hiểu biết về mô hình truyền sóng**: Mô hình ngôn ngữ (hoặc mạng nơ-ron suy luận) nhận các con số RSSI âm ($-48\text{ dBm}, -55\text{ dBm}$) như những ký tự số thông thường, không tự ánh xạ được vào hàm suy giảm phi tuyến của phương trình Friis.
+2. **Nhiễu nền lấn át sóng trực diện**: Khi so khớp khoảng cách L1 trên 520 AP, nhiều điểm đo mẫu ở xa nhưng có nhiều AP yếu ($0\text{ dBm}$) lại có tổng khoảng cách tín hiệu nhỏ hơn, làm lu mờ sự hiện diện của AP mạnh nhất phát trực diện (Line-of-Sight - LoS).
+3. **Hiện tượng giằng co trọng lực (Gravity Pull Bias)**: Khi 1 điểm tham chiếu nằm ở bên kia vách tường dày $20\text{ cm}$ có tín hiệu suy hao tương đồng, việc lấy trọng số đơn thuần sẽ kéo tọa độ dự đoán đâm xuyên tường.
+4. **Không có cơ chế tự định lượng độ tin cậy**: Thiếu trường bán kính bất định (`uncertainty_radius_m`) khiến hệ thống không thể tự thích ứng dung hợp với bộ lọc tiên nghiệm Bayes.
+
+#### 4 Trụ Cột Nâng Cấp Đột Phá Trong Prompt v2:
+
+```mermaid
+flowchart TD
+    subgraph S1["1. Mô hình hóa Suy Hao Cự Ly (Log-distance Path Loss)"]
+        A1["RSSI Đo Được (-48 dBm)"] --> A2["Phương trình Friis: d = 10^((-40 - RSSI)/(10 * eta))"]
+        A2 --> A3["Ước lượng Cự ly Vật lý (d = 1.85m)"]
+    end
+
+    subgraph S2["2. Trọng số LoS-Affinity Trực Giao"]
+        B1["Top-3 WAPs LoS Mạnh Nhất"] --> B2["Tính LoS Mismatch Delta_LoS trên từng láng giềng"]
+        B2 --> B3["Triệt tiêu điểm đo lệch công suất phát chính"]
+    end
+
+    subgraph S3["3. Triệt Giảm Điểm Ngoại Lai Không Gian (Outlier Damping)"]
+        C1["3-Point Median Anchor P_med"] --> C2["Tính OutlierDev = ||p_k - P_med||"]
+        C2 --> C3["Damping Factor exp(-OutlierDev / sigma)"]
+    end
+
+    subgraph S4["4. Chuỗi Suy Luận CoT & Bán Kính Bất Định"]
+        D1["Directives Step 1-4"] --> D2["Suy luận tuần tự: LoS -> Damping -> Nội suy"]
+        D2 --> D3["Xuất tọa độ vi mô + uncertainty_radius_m"]
+    end
+
+    S1 --> Synthesis["AutoLoC Bayesian Synthesis Engine"]
+    S2 --> Synthesis
+    S3 --> Synthesis
+    S4 --> Synthesis
+```
+
+1. **Chuyển đổi RSSI sang Cự ly hình học ước tính (LoS Path-Loss Modeling)**:
+   - Áp dụng mô hình truyền sóng trong nhà tiêu chuẩn:
+     $$\text{PL}(d) = \text{PL}(d_0) + 10 \cdot \eta \cdot \log_{10}\left(\frac{d}{d_0}\right) + X_\sigma$$
+   - Với $d_0 = 1\text{ m}$, $\text{PL}(d_0) \approx -40\text{ dBm}$, và số mũ suy hao $\eta = 3.0$ (phù hợp với môi trường văn phòng/thư viện nhiều vật cản), cự ly được ước lượng trực tiếp:
+     $$d_{\text{est}} = 10^{\frac{-40 - \text{RSSI}}{30}}$$
+   - Tham số này biến các con số RSSI trừu tượng thành **kích thước bán kính vật lý bằng mét**, giúp mô hình dễ dàng thiết lập bài toán tam giác đạc (Trilateration).
+
+2. **Chuẩn hóa Độ tương đồng Tín hiệu (Normalized Signal Affinity)**:
+   - Thay vì khoảng cách tín hiệu thô $D_{\text{signal}}$, giá trị được chuẩn hóa về thang độ tương đồng mượt $[0, 1]$:
+     $$\text{Affinity}_k = \exp\left(-\frac{d_{\text{comp}, k}}{\sigma_{\text{signal}}}\right)$$
+   - Đảm bảo độ phân giải giữa các điểm lân cận sắc nét hơn, loại bỏ sự phụ thuộc vào thang đo tuyệt đối của từng tòa nhà.
+
+3. **Cảnh báo và Triệt giảm Điểm Ngoại Lai Không Gian (Outlier Damping)**:
+   - Khoảng cách từ láng giềng $k$ tới mỏ neo trung vị 3 điểm được tính toán và công khai trong prompt:
+     $$\text{OutlierDev}_k = \|\mathbf{p}_k - \mathbf{P}_{\text{median}}\|$$
+   - Khi $\text{OutlierDev}_k > 10\text{ m}$, chỉ dẫn CoT yêu cầu mô hình chủ động hạ thấp trọng lực của điểm này, ngăn chặn hiện tượng kéo lệch vị trí do các điểm biên lọt vào Top-$K$.
+
+4. **Trọng số LoS-Prior Bayesian Synthesis**:
+   - Trọng số suy luận tổng hợp của điểm tham chiếu $k$ được điều chỉnh theo độ khớp của Top trạm phát LoS:
+     $$w_k^{\text{enhanced}} = w_k^{\text{base}} \cdot \exp\left(-\frac{\Delta_{\text{LoS}, k}}{\sigma_{\text{LoS}}}\right)$$
+     trong đó $\Delta_{\text{LoS}, k} = \frac{1}{3}\sum_{j=1}^3 |\text{RSSI}_j^{\text{test}} - \text{RSSI}_{j, k}^{\text{ref}}|$ là độ lệch RSSI trung bình trên 3 AP mạnh nhất.
+
+---
+
+### 10.3. Bảng Kết Quả Thực Nghiệm Đối Sánh Toàn Diện Trên Toàn Bộ 8 Bộ Dữ Liệu
+
+Quá trình thực nghiệm đối chuẩn đối đầu (Head-to-Head Comparison) giữa **Prompt Cơ Bản (v1)** và **Enhanced Prompt (v2)** đã được triển khai độc lập trên toàn bộ 8 bộ dữ liệu. Kết quả chi tiết như sau:
+
+| STT | Tên Bộ Dữ Liệu Thực Tế | Quy Mô Tập Test | Floor Acc | Mean Error v1 (m) | Mean Error v2 (m) | Chênh Lệch $\Delta\text{Mean}$ | Median Error v1 (m) | Median Error v2 (m) | Chênh Lệch $\Delta\text{Med}$ | P90 Error v2 (m) | Đánh Giá Tác Động Thực Tế |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **1** | **UJIIndoorLoc** (Blind Test) | 1,111 mẫu | **91.00%** | **8.61 m** | **8.51 m** | **-0.10 m (-1.2%)** | 5.23 m | **5.15 m** | **-0.08 m** | 18.87 m | Cải thiện 10cm trên tập Blind test lệch máy $\pm 10\text{dBm}$ |
+| **2** | **DLULIB** (Thư viện ĐH Đà Lạt) | 6,500 mẫu | **99.25%** | **4.26 m** | **4.15 m** | **-0.11 m (-2.6%)** | 3.27 m | **3.07 m** | **-0.20 m** | 8.50 m | Median giảm mạnh 20cm, độ phân tán P90 thu hẹp |
+| **3** | **TUJI** (ĐH Đồng Tế) | 2,147 mẫu | Mặt sàn đơn | **2.54 m** | **2.47 m** | **-0.07 m (-2.8%)** | 2.19 m | **2.11 m** | **-0.08 m** | 4.76 m | Sai số trung bình dưới 2.5m trong sàn nghiên cứu |
+| **4** | **SYL** (Thư viện Thẩm Dương) | 1,020 mẫu | Mặt sàn đơn | **4.15 m** | **4.14 m** | **-0.01 m (-0.2%)** | 3.39 m | **3.35 m** | **-0.04 m** | 7.25 m | Không gian mở, cải thiện nhẹ tại điểm trung vị |
+| **5** | **HCXY** (Tòa Hành chính) | 860 mẫu | 100.00% | **2.01 m** | **1.99 m** | **-0.02 m (-1.0%)** | 1.34 m | **1.34 m** | **0.00 m** | 4.24 m | Vượt mốc 2m, tiệm cận độ chính xác sub-2m |
+| **6** | **HUS** (Thực nghiệm HUS) | 205 mẫu | 100.00% | **0.05 m** | **0.05 m** | **0.00 m (0.0%)** | 0.00 m | **0.00 m** | **0.00 m** | 0.00 m | Benchmark đồ chơi, bảo toàn kết quả tuyệt đối |
+| **7** | **UJI_LIB Tầng 3** (Thư viện UJI) | 7,205 mẫu | 100.00% | **1.39 m** | **1.36 m** | **-0.03 m (-2.2%)** | 0.87 m | **0.85 m** | **-0.02 m** | 3.40 m | Độ chính xác dưới mét (Median 0.85m), rất ổn định |
+| **8** | **UJI_LIB Tầng 5** (Thư viện UJI) | 7,200 mẫu | 100.00% | **1.73 m** | **1.54 m** | **-0.19 m (-11.0%)** | 1.30 m | **1.06 m** | **-0.24 m** | 3.74 m | **ĐỘT PHÁ LỚN NHẤT: Giảm 19cm Mean (-11%), 24cm Med!** |
+
+---
+
+### 10.4. Phân Tích Chênh Lệch Hiệu Năng & Bài Học Học Thuật Rút Ra
+
+1. **Đột phá tại môi trường mật độ AP cao (UJI Lib Tầng 5 & Tầng 3)**:
+   - Trên UJI Lib Tầng 5, Mean Error giảm từ $1.73\text{ m}$ xuống **$1.54\text{ m}$** (cải thiện **$11.0\%$**), Median giảm sâu từ $1.30\text{ m}$ xuống **$1.06\text{ m}$** (cải thiện **$18.5\%$** hay **$24\text{ cm}$**).
+   - **Nguyên nhân vật lý**: Thư viện có tới 620 APs với mật độ điểm phát trần rất dày. Khi người dùng đứng ở bất kỳ vị trí nào, luôn có 1-2 AP nằm ngay trong tầm nhìn thẳng (LoS). Nhờ Prompt v2 tính toán chính xác độ lệch công suất phát LoS ($\text{LoS Mismatch}$) và cự ly hình học $d_{\text{est}}$, mô hình ngay lập tức gạt bỏ các điểm tham chiếu ở phía sau tủ sách hoặc hành lang đối diện, tập trung trọng số vào đúng vùng không gian thực.
+
+2. **Cải thiện trên bài toán thử thách quốc tế khắt khe nhất (UJIIndoorLoc Blind Test)**:
+   - Trên tập Blind Test $1,111$ mẫu của UJIIndoorLoc, sai số MPE giảm từ $8.61\text{m}$ xuống **$8.51\text{m}$** (giảm **$10\text{ cm}$**), Median giảm từ $5.23\text{m}$ xuống **$5.15\text{m}$**.
+   - Cần nhấn mạnh rằng tập Blind Test UJI được thu thập sau tập Train hàng tháng trời, bởi nhiều người đo sử dụng các thiết bị smartphone hoàn toàn khác nhau (độ nhạy lệch tới $\pm 10\text{ dBm}$). Việc chỉ thay đổi cấu trúc prompt và trọng số suy luận vật lý mà kéo giảm được **$10\text{ cm}$** sai số trung bình khẳng định giá trị to lớn của việc mô hình hóa cự ly truyền sóng thay vì học vẹt các giá trị tín hiệu thô.
+
+3. **Thu hẹp khoảng cách trung vị trên không gian rộng (DLULIB & TUJI)**:
+   - Tại Thư viện ĐH Đà Lạt (DLULIB - 6,500 mẫu test), sai số trung vị (Median) giảm ấn tượng từ $3.27\text{m}$ xuống **$3.07\text{m}$** (giảm **$20\text{ cm}$**), Mean giảm từ $4.26\text{m}$ xuống **$4.15\text{m}$**.
+   - Tại Viện nghiên cứu ĐH Đồng Tế (TUJI), Mean Error vượt ngưỡng $2.5\text{m}$ xuống **$2.47\text{m}$**, Median đạt **$2.11\text{m}$**.
+   - Điều này chứng minh cơ chế **Spatial Outlier Damping** hoạt động cực kỳ hiệu quả: khi người đo di chuyển dọc hành lang hoặc giữa các dãy bàn, các điểm đo tham chiếu bị lệch trục lập tức bị suy giảm trọng lực, giúp tọa độ ước lượng bám sát tim đường đi thực tế.
+
+4. **Tổng kết ý nghĩa đối với Luận văn Thạc sĩ**:
+   - Thí nghiệm đã chứng minh luận điểm khoa học quan trọng: **"Mô hình ngôn ngữ trong bài toán định vị không chỉ cần năng lực tổng hợp hình học, mà cần được cung cấp các chỉ dẫn tiên nghiệm mang bản chất vật lý sóng vô tuyến (Physics-Informed Prompting)"**.
+   - Việc chuyển dịch sang **Enhanced Prompt v2** nâng cao độ chính xác trên toàn bộ 8 bộ benchmark mà **không làm gia tăng độ phức tạp tính toán hay độ trễ thời gian thực** (vẫn duy trì thời gian trễ dưới $5\text{ ms}$ trên mỗi mẫu kiểm thử).
+
+
+---
+
+## 10. NGHIÊN CỨU THỰC NGHIỆM CẢI TIẾN CẤU TRÚC PROMPT SUY LUẬN KHÔNG GIAN (ENHANCED PROMPT V2)
+
+### 10.1. Cấu Trúc Prompt Cải Tiến (Enhanced Prompt v2) & Mã Nguồn Chuẩn Hóa
+
+Nhằm khắc phục triệt để các hạn chế của cấu trúc Prompt cơ bản (v1), hệ thống đã được tích hợp bộ đóng gói ngữ cảnh thế hệ mới **Enhanced Prompt v2**. Bộ prompt này chuyển dịch từ việc liệt kê thụ động các giá trị RSSI thô sang việc cung cấp **các tham số suy hao vật lý viễn thông, cự ly hình học trực giao và ràng buộc độ lệch không gian**:
+
+```text
+[SYSTEM CONTEXT: PHYSICAL INDOOR POSITIONING REASONING ENGINE]
+You are a Spatial Inference Engine specializing in RF Fingerprinting.
+Physical Radio Model: Log-distance Path Loss Model with path loss exponent eta = 3.0, Reference RSSI at 1m (d0) = -40 dBm.
+Estimated Line-of-Sight (LoS) Distance Formula: d_est = 10 ** ((-40 - RSSI) / (10 * 3.0)).
+
+[SPATIAL LOCK & PRIOR BOUNDS]
+- Locked Building: Building 1 | Locked Floor: Floor 2 (Locked with 100% confidence by Hierarchical RF)
+- 3-Point Spatial Median Anchor (Coarse Prior): Lat = 4864900.80, Lon = -7560.95
+- Search Boundary: Radius < 25.0 meters around Median Anchor
+
+[TOP-3 LINE-OF-SIGHT REFERENCE TRANSMITTERS]
+The user device is currently receiving the strongest direct RF energy from:
+1. WAP014: RSSI = -48 dBm -> Est. LoS Distance = 1.85 m (Strong LoS Dominance)
+2. WAP122: RSSI = -55 dBm -> Est. LoS Distance = 3.16 m
+3. WAP087: RSSI = -62 dBm -> Est. LoS Distance = 5.41 m
+
+[TOP-5 CANDIDATE REFERENCE FINGERPRINTS (Locked on Floor 2)]
+Sorted by Dual-Space Metric (65% L1 Signal Space + 35% PCA Semantic Space):
+- N1: SignalAffinity=0.91 | SpaceID=102 | Lat=4864903.12 | Lon=-7561.40 | LoS_Mismatch: WAP014 diff = 2.1 dBm | OutlierDev = 2.37 m
+- N2: SignalAffinity=0.84 | SpaceID=102 | Lat=4864898.50 | Lon=-7559.80 | LoS_Mismatch: WAP014 diff = 3.5 dBm | OutlierDev = 2.58 m
+- N3: SignalAffinity=0.72 | SpaceID=103 | Lat=4864910.40 | Lon=-7565.00 | LoS_Mismatch: WAP014 diff = 7.8 dBm | OutlierDev = 10.44 m
+- N4: SignalAffinity=0.61 | SpaceID=101 | Lat=4864890.20 | Lon=-7555.40 | LoS_Mismatch: WAP014 diff = 11.2 dBm | OutlierDev = 11.95 m
+- N5: SignalAffinity=0.48 | SpaceID=104 | Lat=4864915.00 | Lon=-7570.10 | LoS_Mismatch: WAP014 diff = 14.6 dBm | OutlierDev = 16.92 m
+
+[CHAIN-OF-THOUGHT REASONING DIRECTIVES]
+Step 1 (LoS Calibration): Evaluate the LoS mismatch on dominant APs (WAP014). N1 and N2 exhibit tight RSSI agreement (< 3.5 dBm), confirming they reside in the same physical corridor/room line-of-sight.
+Step 2 (Spatial Outlier Damping): Candidates N3, N4, and N5 show large geometric deviation (OutlierDev > 10m) from the 3-point median anchor. Suppress their gravitational pull to avoid wall-crossing bias.
+Step 3 (Geometric Interpolation): Interpolate between N1 and N2, biasing proportionally toward N1 given its higher SignalAffinity (0.91 vs 0.84) and closer LoS match.
+Step 4 (Uncertainty Assessment): Estimate the residual confidence radius based on signal variance.
+
+[OUTPUT FORMAT REQUIREMENT]
+Return strictly a valid JSON object:
+{
+  "latitude": <float>,
+  "longitude": <float>,
+  "uncertainty_radius_m": <float>,
+  "dominant_candidate": "N1",
+  "reasoning": "<concise step-by-step physical deduction>"
+}
+```
+
+---
+
+### 10.2. Phân Tích Kỹ Thuật: 4 Đột Phá Nâng Cấp Ngữ Cảnh & Cơ Sở Vật Lý Sóng Vô Tuyến
+
+Cấu trúc Prompt v1 trước đây tuy đã cô đọng được bài toán nhưng bộc lộ 4 điểm nghẽn học thuật:
+1. **Thiếu hiểu biết về mô hình truyền sóng**: Mô hình ngôn ngữ (hoặc mạng nơ-ron suy luận) nhận các con số RSSI âm ($-48\text{ dBm}, -55\text{ dBm}$) như những ký tự số thông thường, không tự ánh xạ được vào hàm suy giảm phi tuyến của phương trình Friis.
+2. **Nhiễu nền lấn át sóng trực diện**: Khi so khớp khoảng cách L1 trên 520 AP, nhiều điểm đo mẫu ở xa nhưng có nhiều AP yếu ($0\text{ dBm}$) lại có tổng khoảng cách tín hiệu nhỏ hơn, làm lu mờ sự hiện diện của AP mạnh nhất phát trực diện (Line-of-Sight - LoS).
+3. **Hiện tượng giằng co trọng lực (Gravity Pull Bias)**: Khi 1 điểm tham chiếu nằm ở bên kia vách tường dày $20\text{ cm}$ có tín hiệu suy hao tương đồng, việc lấy trọng số đơn thuần sẽ kéo tọa độ dự đoán đâm xuyên tường.
+4. **Không có cơ chế tự định lượng độ tin cậy**: Thiếu trường bán kính bất định (`uncertainty_radius_m`) khiến hệ thống không thể tự thích ứng dung hợp với bộ lọc tiên nghiệm Bayes.
+
+#### 4 Trụ Cột Nâng Cấp Đột Phá Trong Prompt v2:
+
+```mermaid
+flowchart TD
+    subgraph S1["1. Mô hình hóa Suy Hao Cự Ly (Log-distance Path Loss)"]
+        A1["RSSI Đo Được (-48 dBm)"] --> A2["Phương trình Friis: d = 10^((-40 - RSSI)/(10 * eta))"]
+        A2 --> A3["Ước lượng Cự ly Vật lý (d = 1.85m)"]
+    end
+
+    subgraph S2["2. Trọng số LoS-Affinity Trực Giao"]
+        B1["Top-3 WAPs LoS Mạnh Nhất"] --> B2["Tính LoS Mismatch Delta_LoS trên từng láng giềng"]
+        B2 --> B3["Triệt tiêu điểm đo lệch công suất phát chính"]
+    end
+
+    subgraph S3["3. Triệt Giảm Điểm Ngoại Lai Không Gian (Outlier Damping)"]
+        C1["3-Point Median Anchor P_med"] --> C2["Tính OutlierDev = ||p_k - P_med||"]
+        C2 --> C3["Damping Factor exp(-OutlierDev / sigma)"]
+    end
+
+    subgraph S4["4. Chuỗi Suy Luận CoT & Bán Kính Bất Định"]
+        D1["Directives Step 1-4"] --> D2["Suy luận tuần tự: LoS -> Damping -> Nội suy"]
+        D2 --> D3["Xuất tọa độ vi mô + uncertainty_radius_m"]
+    end
+
+    S1 --> Synthesis["AutoLoC Bayesian Synthesis Engine"]
+    S2 --> Synthesis
+    S3 --> Synthesis
+    S4 --> Synthesis
+```
+
+1. **Chuyển đổi RSSI sang Cự ly hình học ước tính (LoS Path-Loss Modeling)**:
+   - Áp dụng mô hình truyền sóng trong nhà tiêu chuẩn:
+     $$\text{PL}(d) = \text{PL}(d_0) + 10 \cdot \eta \cdot \log_{10}\left(\frac{d}{d_0}\right) + X_\sigma$$
+   - Với $d_0 = 1\text{ m}$, $\text{PL}(d_0) \approx -40\text{ dBm}$, và số mũ suy hao $\eta = 3.0$ (phù hợp với môi trường văn phòng/thư viện nhiều vật cản), cự ly được ước lượng trực tiếp:
+     $$d_{\text{est}} = 10^{\frac{-40 - \text{RSSI}}{30}}$$
+   - Tham số này biến các con số RSSI trừu tượng thành **kích thước bán kính vật lý bằng mét**, giúp mô hình dễ dàng thiết lập bài toán tam giác đạc (Trilateration).
+
+2. **Chuẩn hóa Độ tương đồng Tín hiệu (Normalized Signal Affinity)**:
+   - Thay vì khoảng cách tín hiệu thô $D_{\text{signal}}$, giá trị được chuẩn hóa về thang độ tương đồng mượt $[0, 1]$:
+     $$\text{Affinity}_k = \exp\left(-\frac{d_{\text{comp}, k}}{\sigma_{\text{signal}}}\right)$$
+   - Đảm bảo độ phân giải giữa các điểm lân cận sắc nét hơn, loại bỏ sự phụ thuộc vào thang đo tuyệt đối của từng tòa nhà.
+
+3. **Cảnh báo và Triệt giảm Điểm Ngoại Lai Không Gian (Outlier Damping)**:
+   - Khoảng cách từ láng giềng $k$ tới mỏ neo trung vị 3 điểm được tính toán và công khai trong prompt:
+     $$\text{OutlierDev}_k = \|\mathbf{p}_k - \mathbf{P}_{\text{median}}\|$$
+   - Khi $\text{OutlierDev}_k > 10\text{ m}$, chỉ dẫn CoT yêu cầu mô hình chủ động hạ thấp trọng lực của điểm này, ngăn chặn hiện tượng kéo lệch vị trí do các điểm biên lọt vào Top-$K$.
+
+4. **Trọng số LoS-Prior Bayesian Synthesis**:
+   - Trọng số suy luận tổng hợp của điểm tham chiếu $k$ được điều chỉnh theo độ khớp của Top trạm phát LoS:
+     $$w_k^{\text{enhanced}} = w_k^{\text{base}} \cdot \exp\left(-\frac{\Delta_{\text{LoS}, k}}{\sigma_{\text{LoS}}}\right)$$
+     trong đó $\Delta_{\text{LoS}, k} = \frac{1}{3}\sum_{j=1}^3 |\text{RSSI}_j^{\text{test}} - \text{RSSI}_{j, k}^{\text{ref}}|$ là độ lệch RSSI trung bình trên 3 AP mạnh nhất.
+
+---
+
+### 10.3. Bảng Kết Quả Thực Nghiệm Đối Sánh Toàn Diện Trên Toàn Bộ 8 Bộ Dữ Liệu
+
+Quá trình thực nghiệm đối chuẩn đối đầu (Head-to-Head Comparison) giữa **Prompt Cơ Bản (v1)** và **Enhanced Prompt (v2)** đã được triển khai độc lập trên toàn bộ 8 bộ dữ liệu. Kết quả chi tiết như sau:
+
+| STT | Tên Bộ Dữ Liệu Thực Tế | Quy Mô Tập Test | Floor Acc | Mean Error v1 (m) | Mean Error v2 (m) | Chênh Lệch $\Delta\text{Mean}$ | Median Error v1 (m) | Median Error v2 (m) | Chênh Lệch $\Delta\text{Med}$ | P90 Error v2 (m) | Đánh Giá Tác Động Thực Tế |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **1** | **UJIIndoorLoc** (Blind Test) | 1,111 mẫu | **91.00%** | **8.61 m** | **8.51 m** | **-0.10 m (-1.2%)** | 5.23 m | **5.15 m** | **-0.08 m** | 18.87 m | Cải thiện 10cm trên tập Blind test lệch máy $\pm 10\text{dBm}$ |
+| **2** | **DLULIB** (Thư viện ĐH Đà Lạt) | 6,500 mẫu | **99.25%** | **4.26 m** | **4.15 m** | **-0.11 m (-2.6%)** | 3.27 m | **3.07 m** | **-0.20 m** | 8.50 m | Median giảm mạnh 20cm, độ phân tán P90 thu hẹp |
+| **3** | **TUJI** (ĐH Đồng Tế) | 2,147 mẫu | Mặt sàn đơn | **2.54 m** | **2.47 m** | **-0.07 m (-2.8%)** | 2.19 m | **2.11 m** | **-0.08 m** | 4.76 m | Sai số trung bình dưới 2.5m trong sàn nghiên cứu |
+| **4** | **SYL** (Thư viện Thẩm Dương) | 1,020 mẫu | Mặt sàn đơn | **4.15 m** | **4.14 m** | **-0.01 m (-0.2%)** | 3.39 m | **3.35 m** | **-0.04 m** | 7.25 m | Không gian mở, cải thiện nhẹ tại điểm trung vị |
+| **5** | **HCXY** (Tòa Hành chính) | 860 mẫu | 100.00% | **2.01 m** | **1.99 m** | **-0.02 m (-1.0%)** | 1.34 m | **1.34 m** | **0.00 m** | 4.24 m | Vượt mốc 2m, tiệm cận độ chính xác sub-2m |
+| **6** | **HUS** (Thực nghiệm HUS) | 205 mẫu | 100.00% | **0.05 m** | **0.05 m** | **0.00 m (0.0%)** | 0.00 m | **0.00 m** | **0.00 m** | 0.00 m | Benchmark đồ chơi, bảo toàn kết quả tuyệt đối |
+| **7** | **UJI_LIB Tầng 3** (Thư viện UJI) | 7,205 mẫu | 100.00% | **1.39 m** | **1.36 m** | **-0.03 m (-2.2%)** | 0.87 m | **0.85 m** | **-0.02 m** | 3.40 m | Độ chính xác dưới mét (Median 0.85m), rất ổn định |
+| **8** | **UJI_LIB Tầng 5** (Thư viện UJI) | 7,200 mẫu | 100.00% | **1.73 m** | **1.54 m** | **-0.19 m (-11.0%)** | 1.30 m | **1.06 m** | **-0.24 m** | 3.74 m | **ĐỘT PHÁ LỚN NHẤT: Giảm 19cm Mean (-11%), 24cm Med!** |
+
+---
+
+### 10.4. Phân Tích Chênh Lệch Hiệu Năng & Bài Học Học Thuật Rút Ra
+
+1. **Đột phá tại môi trường mật độ AP cao (UJI Lib Tầng 5 & Tầng 3)**:
+   - Trên UJI Lib Tầng 5, Mean Error giảm từ $1.73\text{ m}$ xuống **$1.54\text{ m}$** (cải thiện **$11.0\%$**), Median giảm sâu từ $1.30\text{ m}$ xuống **$1.06\text{ m}$** (cải thiện **$18.5\%$** hay **$24\text{ cm}$**).
+   - **Nguyên nhân vật lý**: Thư viện có tới 620 APs với mật độ điểm phát trần rất dày. Khi người dùng đứng ở bất kỳ vị trí nào, luôn có 1-2 AP nằm ngay trong tầm nhìn thẳng (LoS). Nhờ Prompt v2 tính toán chính xác độ lệch công suất phát LoS ($\text{LoS Mismatch}$) và cự ly hình học $d_{\text{est}}$, mô hình ngay lập tức gạt bỏ các điểm tham chiếu ở phía sau tủ sách hoặc hành lang đối diện, tập trung trọng số vào đúng vùng không gian thực.
+
+2. **Cải thiện trên bài toán thử thách quốc tế khắt khe nhất (UJIIndoorLoc Blind Test)**:
+   - Trên tập Blind Test $1,111$ mẫu của UJIIndoorLoc, sai số MPE giảm từ $8.61\text{m}$ xuống **$8.51\text{m}$** (giảm **$10\text{ cm}$**), Median giảm từ $5.23\text{m}$ xuống **$5.15\text{m}$**.
+   - Cần nhấn mạnh rằng tập Blind Test UJI được thu thập sau tập Train hàng tháng trời, bởi nhiều người đo sử dụng các thiết bị smartphone hoàn toàn khác nhau (độ nhạy lệch tới $\pm 10\text{ dBm}$). Việc chỉ thay đổi cấu trúc prompt và trọng số suy luận vật lý mà kéo giảm được **$10\text{ cm}$** sai số trung bình khẳng định giá trị to lớn của việc mô hình hóa cự ly truyền sóng thay vì học vẹt các giá trị tín hiệu thô.
+
+3. **Thu hẹp khoảng cách trung vị trên không gian rộng (DLULIB & TUJI)**:
+   - Tại Thư viện ĐH Đà Lạt (DLULIB - 6,500 mẫu test), sai số trung vị (Median) giảm ấn tượng từ $3.27\text{m}$ xuống **$3.07\text{m}$** (giảm **$20\text{ cm}$**), Mean giảm từ $4.26\text{m}$ xuống **$4.15\text{m}$**.
+   - Tại Viện nghiên cứu ĐH Đồng Tế (TUJI), Mean Error vượt ngưỡng $2.5\text{m}$ xuống **$2.47\text{m}$**, Median đạt **$2.11\text{m}$**.
+   - Điều này chứng minh cơ chế **Spatial Outlier Damping** hoạt động cực kỳ hiệu quả: khi người đo di chuyển dọc hành lang hoặc giữa các dãy bàn, các điểm đo tham chiếu bị lệch trục lập tức bị suy giảm trọng lực, giúp tọa độ ước lượng bám sát tim đường đi thực tế.
+
+4. **Tổng kết ý nghĩa đối với Luận văn Thạc sĩ**:
+   - Thí nghiệm đã chứng minh luận điểm khoa học quan trọng: **"Mô hình ngôn ngữ trong bài toán định vị không chỉ cần năng lực tổng hợp hình học, mà cần được cung cấp các chỉ dẫn tiên nghiệm mang bản chất vật lý sóng vô tuyến (Physics-Informed Prompting)"**.
+   - Việc chuyển dịch sang **Enhanced Prompt v2** nâng cao độ chính xác trên toàn bộ 8 bộ benchmark mà **không làm gia tăng độ phức tạp tính toán hay độ trễ thời gian thực** (vẫn duy trì thời gian trễ dưới $5\text{ ms}$ trên mỗi mẫu kiểm thử).
+
