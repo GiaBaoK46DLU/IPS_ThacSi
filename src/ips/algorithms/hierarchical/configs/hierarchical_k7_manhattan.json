@@ -1,0 +1,13 @@
+{
+    "algorithm_id": "hierarchical",
+    "seed": 42,
+    "device": "cpu",
+    "output_dir": "runs\\hierarchical_k7_manhattan",
+    "smoke": false,
+    "params": {
+        "n_estimators": 50,
+        "n_neighbors": 7,
+        "metric": "manhattan",
+        "penalty_weight": 1000.0
+    }
+}

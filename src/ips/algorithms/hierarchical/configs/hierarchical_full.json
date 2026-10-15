@@ -1,0 +1,17 @@
+{
+  "algorithm_id": "hierarchical",
+  "params": {
+    "n_estimators": 50,
+    "n_neighbors": 3,
+    "penalty_weight": 1000.0
+  },
+  "split_dir": "data/processed/uji_group_split_v1",
+  "output_dir": "runs/hierarchical_full_v2",
+  "task": "position",
+  "device": "cpu",
+  "seed": 42,
+  "smoke": false,
+  "evaluation_splits": ["validation", "test"],
+  "export_plots": true
+}
+

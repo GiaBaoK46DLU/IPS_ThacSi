@@ -1,13 +1,13 @@
-[build-system]
+﻿[build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "uji-ips-mixers"
 version = "0.1.0"
-description = "Shared Wi-Fi IPS algorithms with an efficient-kan KAN-Mixer implementation"
-requires-python = ">=3.12,<3.13"
-dependencies = ["numpy==2.2.6", "scikit-learn==1.6.1", "torch==2.9.0", "psutil==7.2.2", "matplotlib==3.10.8"]
+description = "Reproducible Wi-Fi IPS with MLP, MLP-Mixer and RSSI-KAN-Mixer"
+requires-python = ">=3.9"
+dependencies = ["numpy", "scikit-learn", "torch", "psutil", "matplotlib"]
 
 [project.scripts]
 ips = "ips.cli:main"

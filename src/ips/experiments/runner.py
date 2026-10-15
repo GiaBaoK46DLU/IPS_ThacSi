@@ -1,4 +1,5 @@
 """Algorithm lifecycle and audited shared splits, without a neural training assumption."""
+from __future__ import annotations
 import contextlib
 import sys
 import time

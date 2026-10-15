@@ -1,0 +1,98 @@
+[
+  {
+    "dataset": "UJIIndoorLoc (Blind Test 1,111)",
+    "samples": 1111,
+    "floor_acc": 91.0,
+    "building_acc": 99.91,
+    "mean_v1": 8.61,
+    "mean_v2": 8.51,
+    "median_v1": 5.23,
+    "median_v2": 5.15,
+    "p90_v1": 18.72,
+    "p90_v2": 18.87
+  },
+  {
+    "dataset": "DLULIB (Thư viện ĐH Đà Lạt 6,500)",
+    "samples": 6500,
+    "floor_acc": 99.25,
+    "building_acc": 100.0,
+    "mean_v1": 4.26,
+    "mean_v2": 4.15,
+    "median_v1": 3.27,
+    "median_v2": 3.07,
+    "p90_v1": 8.71,
+    "p90_v2": 8.5
+  },
+  {
+    "dataset": "TUJI (ĐH Đồng Tế 2,147)",
+    "samples": 2147,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 2.54,
+    "mean_v2": 2.47,
+    "median_v1": 2.19,
+    "median_v2": 2.11,
+    "p90_v1": 4.77,
+    "p90_v2": 4.76
+  },
+  {
+    "dataset": "SYL (Thư viện Thẩm Dương 1,020)",
+    "samples": 1020,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 4.15,
+    "mean_v2": 4.14,
+    "median_v1": 3.39,
+    "median_v2": 3.35,
+    "p90_v1": 7.25,
+    "p90_v2": 7.25
+  },
+  {
+    "dataset": "HCXY (Tòa nhà Hành chính 860)",
+    "samples": 860,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 2.01,
+    "mean_v2": 1.99,
+    "median_v1": 1.34,
+    "median_v2": 1.34,
+    "p90_v1": 4.25,
+    "p90_v2": 4.24
+  },
+  {
+    "dataset": "HUS (Thực nghiệm HUS 205)",
+    "samples": 205,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 0.05,
+    "mean_v2": 0.05,
+    "median_v1": 0.0,
+    "median_v2": 0.0,
+    "p90_v1": 0.0,
+    "p90_v2": 0.0
+  },
+  {
+    "dataset": "UJI Lib Tầng 3 (7,205 mẫu)",
+    "samples": 7205,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 1.39,
+    "mean_v2": 1.36,
+    "median_v1": 0.87,
+    "median_v2": 0.85,
+    "p90_v1": 3.41,
+    "p90_v2": 3.4
+  },
+  {
+    "dataset": "UJI Lib Tầng 5 (7,200 mẫu)",
+    "samples": 7200,
+    "floor_acc": 100.0,
+    "building_acc": 100.0,
+    "mean_v1": 1.73,
+    "mean_v2": 1.54,
+    "median_v1": 1.3,
+    "median_v2": 1.06,
+    "p90_v1": 4.01,
+    "p90_v2": 3.74
+  }
+]

@@ -1,0 +1,17 @@
+{
+    "algorithm_id": "hierarchical",
+    "seed": 42,
+    "device": "cpu",
+    "output_dir": "runs\\hierarchical_final_test",
+    "smoke": false,
+    "evaluation_splits": [
+        "validation",
+        "test"
+    ],
+    "params": {
+        "n_estimators": 50,
+        "n_neighbors": 9,
+        "metric": "manhattan",
+        "penalty_weight": 1000.0
+    }
+}

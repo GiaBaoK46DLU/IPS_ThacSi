@@ -1,4 +1,4 @@
-.venv/
+﻿.venv/
 .venv-cuda/
 __pycache__/
 *.py[cod]
@@ -11,6 +11,9 @@ runs/
 .DS_Store
 # Temporary owner files created when Office documents are open.
 ~$*
+.venv39/
+diagram-design/
+.archify/
 
 # Personal baseline study and archives: kept locally.
 /personal_learning/
