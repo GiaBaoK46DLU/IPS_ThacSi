@@ -1,0 +1,15 @@
+%%{init: {'theme':'base','fontFamily':'Arial','themeVariables': {'fontFamily':'Arial','fontSize':'18px','primaryColor':'#eef4f8','primaryTextColor':'#102536','primaryBorderColor':'#587890','lineColor':'#476578'}, 'flowchart': {'htmlLabels':false,'curve':'linear','nodeSpacing':35,'rankSpacing':30}}}%%
+flowchart TD
+    Q["RSSI truy vấn<br/>Không có nhãn vị trí"] --> P["Xử lý mã thiếu z và mask<br/>Padding 520 và giữ AP order"]
+    P --> M["Embedding 26 token × 40 features<br/>KAN Mixer hai khối B spline"]
+    M --> S["Chấm điểm tham chiếu<br/>Chọn lớp bằng KAN"]
+    T["Catalogue tọa độ và RSSI<br/>chỉ từ train nội bộ"] -.-> S
+    S --> N["Decoder k và T từ UJI<br/>Tọa độ XY KAN"]
+    P --> K["10 láng giềng trong lớp KAN<br/>Khoảng cách RSSI cho XY NN"]
+    T -.-> K
+    S -->|"Lớp dự đoán"| K
+    N --> A["KAN tham chiếu<br/>Lớp và XY KAN"]
+    N --> H["KAN lai giữ lớp KAN<br/>0.75 XY KAN cộng 0.25 XY NN"]
+    K --> H
+    classDef output fill:#dceaf1,stroke:#245e81,stroke-width:2px
+    class A,H output
