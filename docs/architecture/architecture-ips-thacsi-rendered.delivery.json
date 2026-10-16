@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "receiptId": "16b0d154-133e-448a-9ef8-8c15097652a5",
+  "receiptId": "d66ad00c-0a02-4b88-ad5e-9d13125899c3",
   "status": "current",
   "command": "deliver",
   "type": "architecture",
   "input": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-candidate.json",
   "output": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
   "specification": {
-    "sha256": "00feeb8e5ffa418209cb99f25d4e802755c03e16153b908baea194fc91463ca0",
-    "bytes": 3240
+    "sha256": "81717d071ada92c3e13811a2f08869b3483f1b418c84b913cf1a95abb0a543d7",
+    "bytes": 4048
   },
   "artifact": {
-    "sha256": "0c0b093dbff675cd214d10c2c157c35c439a9ede3964605ec5acfe3dcb2a0764",
-    "bytes": 758153
+    "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
+    "bytes": 760341
   }
 }
