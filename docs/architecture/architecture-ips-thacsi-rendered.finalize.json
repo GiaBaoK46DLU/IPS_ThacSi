@@ -5,16 +5,16 @@
   "status": "pass",
   "type": "architecture",
   "quality": "showcase",
-  "startedAt": "2026-10-16T15:00:43.286Z",
+  "startedAt": "2026-10-16T15:13:43.259Z",
   "specification": {
     "path": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-candidate.json",
-    "sha256": "81717d071ada92c3e13811a2f08869b3483f1b418c84b913cf1a95abb0a543d7",
-    "bytes": 4048
+    "sha256": "14b4ebde70a1e1ade5862b76f3bb57892acbf71e08bce536e4d2d56e9b80546f",
+    "bytes": 5103
   },
   "artifact": {
     "path": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
-    "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
-    "bytes": 760341
+    "sha256": "460b977e003596145b1a5ff641221f31403a8ed093e015ec610662d6ee419d29",
+    "bytes": 764285
   },
   "stages": {
     "validate": {
@@ -38,8 +38,8 @@
         "ok": true,
         "command": "validate",
         "specification": {
-          "sha256": "81717d071ada92c3e13811a2f08869b3483f1b418c84b913cf1a95abb0a543d7",
-          "bytes": 4048
+          "sha256": "14b4ebde70a1e1ade5862b76f3bb57892acbf71e08bce536e4d2d56e9b80546f",
+          "bytes": 5103
         },
         "validation": {
           "checksPassed": 9,
@@ -54,7 +54,7 @@
     "deliver": {
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 1252,
+      "durationMs": 1028,
       "command": [
         "C:\\nvm4w\\nodejs\\node.exe",
         "C:\\Users\\quang\\.agents\\skills\\archify\\bin\\archify.mjs",
@@ -68,19 +68,19 @@
       ],
       "receipt": {
         "schemaVersion": 1,
-        "receiptId": "d66ad00c-0a02-4b88-ad5e-9d13125899c3",
+        "receiptId": "f69a97da-e091-47a1-8f8b-5e5f762762dd",
         "ok": true,
         "command": "deliver",
         "type": "architecture",
         "input": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-candidate.json",
         "output": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
         "specification": {
-          "sha256": "81717d071ada92c3e13811a2f08869b3483f1b418c84b913cf1a95abb0a543d7",
-          "bytes": 4048
+          "sha256": "14b4ebde70a1e1ade5862b76f3bb57892acbf71e08bce536e4d2d56e9b80546f",
+          "bytes": 5103
         },
         "artifact": {
-          "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
-          "bytes": 760341
+          "sha256": "460b977e003596145b1a5ff641221f31403a8ed093e015ec610662d6ee419d29",
+          "bytes": 764285
         },
         "validation": {
           "checksPassed": 9,
@@ -106,7 +106,7 @@
     "check": {
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 226,
+      "durationMs": 222,
       "command": [
         "C:\\nvm4w\\nodejs\\node.exe",
         "C:\\Users\\quang\\.agents\\skills\\archify\\bin\\archify.mjs",
@@ -118,8 +118,8 @@
         "ok": true,
         "file": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
         "artifact": {
-          "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
-          "bytes": 760341
+          "sha256": "460b977e003596145b1a5ff641221f31403a8ed093e015ec610662d6ee419d29",
+          "bytes": 764285
         },
         "checks": [
           {
@@ -186,16 +186,16 @@
             "containerBorderRuns": 0,
             "labelRouteClearanceIssues": 0,
             "labelCanvasOverflowIssues": 0,
-            "minLabelRouteClearance": 6,
+            "minLabelRouteClearance": 11,
             "desktopReadabilityIssues": 0,
             "viewportHeightIssues": 0,
-            "minProjectedNodeTextPx": 6.535484870967743,
+            "minProjectedNodeTextPx": 6.783625730994153,
             "maxBends": 2,
             "routesOverSuggestedBends": 0,
             "maxStretch": 1,
             "routesOverSuggestedStretch": 0,
-            "minSegmentPx": 20,
-            "minInteriorSegmentPx": 39,
+            "minSegmentPx": 24,
+            "minInteriorSegmentPx": 54,
             "shortSegmentCount": 0,
             "shortEndpointSegmentCount": 0,
             "shortInteriorSegmentCount": 0,
@@ -209,23 +209,13 @@
           },
           "routeReview": {
             "crossings": [],
-            "crowdedSides": [
-              {
-                "node": "factory",
-                "label": "AlgorithmFactory",
-                "side": "right",
-                "relationships": 4,
-                "sidePx": 60,
-                "neededPx": 74
-              }
-            ],
             "detours": []
           },
           "leadingSpace": {
             "measured": true,
-            "emptyTopPx": 50,
-            "emptyTopRatio": 0.1,
-            "occupiedTop": 50,
+            "emptyTopPx": 20,
+            "emptyTopRatio": 0.04,
+            "occupiedTop": 20,
             "viewBoxTop": 0,
             "canvasHeight": 498,
             "typicalNodeHeight": 60,
@@ -234,10 +224,10 @@
           "desktopReadability": {
             "budgetBasis": "recognized-declared-wide",
             "readerContract": "declared-wide-v1",
-            "availableDiagramWidth": 1013,
-            "actualBudgetPx": 1013,
-            "actualReaderWidth": 1043,
-            "desiredReaderWidth": 1043,
+            "availableDiagramWidth": 1020,
+            "actualBudgetPx": 1020,
+            "actualReaderWidth": 1050,
+            "desiredReaderWidth": 1050,
             "viewportCap": 1376,
             "limit": "source-size",
             "requestedTargetPx": 7.5,
@@ -248,20 +238,20 @@
               "kind": "boundary",
               "id": null
             },
-            "minimumSourceTextPx": 6.535484870967743,
-            "minimumProjectedTextPx": 6.535484870967743,
-            "semanticTextCount": 27
+            "minimumSourceTextPx": 6.783625730994153,
+            "minimumProjectedTextPx": 6.783625730994153,
+            "semanticTextCount": 30
           },
           "issues": []
         },
         "provenance": "current",
-        "deliveryReceiptId": "d66ad00c-0a02-4b88-ad5e-9d13125899c3"
+        "deliveryReceiptId": "f69a97da-e091-47a1-8f8b-5e5f762762dd"
       }
     },
     "browser-check": {
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 1561,
+      "durationMs": 1239,
       "command": [
         "C:\\nvm4w\\nodejs\\node.exe",
         "C:\\Users\\quang\\.agents\\skills\\archify\\bin\\archify.mjs",
@@ -279,11 +269,11 @@
         "status": "pass",
         "visualReview": "not-requested",
         "provenance": "current",
-        "deliveryReceiptId": "d66ad00c-0a02-4b88-ad5e-9d13125899c3",
+        "deliveryReceiptId": "f69a97da-e091-47a1-8f8b-5e5f762762dd",
         "artifact": {
           "path": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
-          "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
-          "bytes": 760341
+          "sha256": "460b977e003596145b1a5ff641221f31403a8ed093e015ec610662d6ee419d29",
+          "bytes": 764285
         },
         "state": {
           "detail": "read",
@@ -320,15 +310,15 @@
                 "bodyPaddingPx": 12,
                 "headerPx": 52,
                 "diagramChromePx": 78,
-                "svgPx": 662,
+                "svgPx": 657,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -370,15 +360,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
                 "diagramChromePx": 84,
-                "svgPx": 740,
+                "svgPx": 735,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -414,8 +404,8 @@
               "readerOverflow": null,
               "readerFit": "intrinsic-height",
               "ok": true,
-              "readerWidth": 1779,
-              "diagramWidth": 1749,
+              "readerWidth": 1791,
+              "diagramWidth": 1761,
               "pageComposition": {
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
@@ -424,11 +414,11 @@
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -470,15 +460,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 68,
                 "diagramChromePx": 94,
-                "svgPx": 919,
+                "svgPx": 913,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -573,15 +563,15 @@
                 "bodyPaddingPx": 12,
                 "headerPx": 52,
                 "diagramChromePx": 78,
-                "svgPx": 662,
+                "svgPx": 657,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -623,15 +613,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
                 "diagramChromePx": 84,
-                "svgPx": 740,
+                "svgPx": 735,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -667,8 +657,8 @@
               "readerOverflow": null,
               "readerFit": "intrinsic-height",
               "ok": true,
-              "readerWidth": 1779,
-              "diagramWidth": 1749,
+              "readerWidth": 1791,
+              "diagramWidth": 1761,
               "pageComposition": {
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
@@ -677,11 +667,11 @@
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -723,15 +713,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 68,
                 "diagramChromePx": 94,
-                "svgPx": 919,
+                "svgPx": 913,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -778,15 +768,15 @@
                 "bodyPaddingPx": 12,
                 "headerPx": 52,
                 "diagramChromePx": 78,
-                "svgPx": 662,
+                "svgPx": 657,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -828,15 +818,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
                 "diagramChromePx": 84,
-                "svgPx": 740,
+                "svgPx": 735,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -872,8 +862,8 @@
               "readerOverflow": null,
               "readerFit": "intrinsic-height",
               "ok": true,
-              "readerWidth": 1779,
-              "diagramWidth": 1749,
+              "readerWidth": 1791,
+              "diagramWidth": 1761,
               "pageComposition": {
                 "bodyPaddingPx": 64,
                 "headerPx": 60,
@@ -882,11 +872,11 @@
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -928,15 +918,15 @@
                 "bodyPaddingPx": 64,
                 "headerPx": 68,
                 "diagramChromePx": 94,
-                "svgPx": 919,
+                "svgPx": 913,
                 "cardsPx": 0,
                 "viewBoxHeight": 498
               },
-              "viewBoxWidth": 1013,
-              "minimumProjectedNodeTextPx": 6.535484870967743,
-              "minimumProjectedNonEdgeTextPx": 6.535484870967743,
+              "viewBoxWidth": 1020,
+              "minimumProjectedNodeTextPx": 6.783625730994153,
+              "minimumProjectedNonEdgeTextPx": 6.783625730994153,
               "minimumProjectedEdgeTextPx": 8,
-              "minimumProjectedNodeText": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)",
+              "minimumProjectedNodeText": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
               "minimumProjectedNodeTextDetail": "boundary",
               "minimumProjectedNodeTextOwner": {
                 "kind": "boundary",
@@ -977,8 +967,8 @@
     "browserCheckReceipt": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.browser-check.json"
   },
   "visualReview": "not-requested",
-  "finishedAt": "2026-10-16T15:00:46.939Z",
-  "durationMs": 3653,
+  "finishedAt": "2026-10-16T15:13:46.276Z",
+  "durationMs": 3016,
   "update": {
     "status": "update_available",
     "installedVersion": "3.0.1",

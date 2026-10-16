@@ -7,13 +7,13 @@
   "quality": "showcase",
   "specification": {
     "path": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-candidate.json",
-    "sha256": "81717d071ada92c3e13811a2f08869b3483f1b418c84b913cf1a95abb0a543d7",
-    "bytes": 4048
+    "sha256": "14b4ebde70a1e1ade5862b76f3bb57892acbf71e08bce536e4d2d56e9b80546f",
+    "bytes": 5103
   },
   "artifact": {
     "path": "D:\\IPS_ThacSi\\docs\\architecture\\architecture-ips-thacsi-rendered.html",
-    "sha256": "68823962ce8166e0bd1edd7d323a85e82e686790cf0bb0e1817c14ab514744c3",
-    "bytes": 760341
+    "sha256": "460b977e003596145b1a5ff641221f31403a8ed093e015ec610662d6ee419d29",
+    "bytes": 764285
   },
   "gates": {
     "validate": "pass",
@@ -45,5 +45,5 @@
     "eventKey": "archify@sha256:ffedc53390c9da6e859f41e432c5d2d0615a23cf00a503181f07efbba88a7ce8"
   },
   "visualReview": "not-requested",
-  "durationMs": 3653
+  "durationMs": 3016
 }

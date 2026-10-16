@@ -2,37 +2,187 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Kiến Trúc Tổng Thể Hệ Thống Định Vị Trong Nhà IPS_ThacSi",
+    "title": "Kiến Trúc Toàn Hệ Thống IPS_ThacSi (Đăng Ký Thuật Toán Tại AlgorithmFactory)",
     "output": "architecture-ips-thacsi-rendered.html",
     "quality_profile": "showcase"
   },
   "components": [
-    { "id": "cli", "type": "external", "label": "CLI / Scripts", "sublabel": "Multi-Benchmark & Scarcity", "pos": [40, 210], "size": [130, 60] },
-    { "id": "runner", "type": "backend", "label": "ExperimentRunner", "sublabel": "src/ips/experiments", "pos": [280, 210], "size": [150, 60] },
-    { "id": "factory", "type": "backend", "label": "AlgorithmFactory", "sublabel": "Registry & Dispatcher", "pos": [540, 210], "size": [150, 60] },
-    { "id": "macro_rf", "type": "backend", "label": "Tầng 1: Khóa Tòa/Tầng", "sublabel": "Hierarchical RF (91-100%)", "pos": [760, 80], "size": [180, 58] },
-    { "id": "micro_rf", "type": "backend", "label": "Tầng 2: Hồi Quy Vi Mô", "sublabel": "Per-Floor RF Regressors", "pos": [760, 165], "size": [180, 58] },
-    { "id": "autoloc", "type": "backend", "label": "Tầng 3: AutoLoC Engine", "sublabel": "Physics-Informed Reasoning", "pos": [760, 250], "size": [180, 58] },
-    { "id": "neural", "type": "backend", "label": "Thuật Toán Đối Sách", "sublabel": "MLP / KAN / Mixers", "pos": [760, 335], "size": [180, 58] },
-    { "id": "data", "type": "database", "label": "Dữ Liệu Đa Benchmark", "sublabel": "8 Bộ Dữ Liệu Thực Tế", "pos": [280, 370], "size": [150, 60] },
-    { "id": "reports", "type": "database", "label": "Báo Cáo & Kết Quả", "sublabel": "docs/Hoc/ & Excel Master", "pos": [540, 370], "size": [150, 60] }
+    {
+      "id": "cli",
+      "type": "external",
+      "label": "CLI / Scripts",
+      "sublabel": "Multi-Benchmark & Scarcity",
+      "pos": [40, 205],
+      "size": [130, 60]
+    },
+    {
+      "id": "runner",
+      "type": "backend",
+      "label": "ExperimentRunner",
+      "sublabel": "src/ips/experiments",
+      "pos": [270, 205],
+      "size": [150, 60]
+    },
+    {
+      "id": "factory",
+      "type": "backend",
+      "label": "AlgorithmFactory",
+      "sublabel": "Registry & Dispatcher",
+      "pos": [510, 185],
+      "size": [150, 100]
+    },
+    {
+      "id": "rf_autoloc",
+      "type": "backend",
+      "label": "rf_autoloc (RF + AutoLoC)",
+      "sublabel": "HybridRFAutoLoCAlgorithm",
+      "pos": [760, 50],
+      "size": [190, 56]
+    },
+    {
+      "id": "hierarchical",
+      "type": "backend",
+      "label": "hierarchical (RF Model)",
+      "sublabel": "HierarchicalAlgorithm",
+      "pos": [760, 125],
+      "size": [190, 56]
+    },
+    {
+      "id": "kan_mixer",
+      "type": "backend",
+      "label": "kan_mixer (KAN-Mixer)",
+      "sublabel": "KANMixerAlgorithm",
+      "pos": [760, 200],
+      "size": [190, 56]
+    },
+    {
+      "id": "llm",
+      "type": "backend",
+      "label": "llm (Pure AutoLoC)",
+      "sublabel": "LLMAutoLoCAlgorithm",
+      "pos": [760, 275],
+      "size": [190, 56]
+    },
+    {
+      "id": "huim",
+      "type": "backend",
+      "label": "huim (HUIM Adapter)",
+      "sublabel": "Itemsets (Đang phát triển)",
+      "pos": [760, 350],
+      "size": [190, 56],
+      "tag": "future"
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "Dữ Liệu Đa Benchmark",
+      "sublabel": "8 Bộ Dữ Liệu Thực Tế",
+      "pos": [270, 370],
+      "size": [150, 60]
+    },
+    {
+      "id": "reports",
+      "type": "database",
+      "label": "Báo Cáo & Kết Quả",
+      "sublabel": "docs/Hoc/ & Excel Master",
+      "pos": [510, 370],
+      "size": [150, 60]
+    }
   ],
   "boundaries": [
-    { "kind": "region", "label": "src/ips/algorithms (Kiến Trúc Phân Cấp & Mô Hình Lai Ghép)", "wraps": ["macro_rf", "micro_rf", "autoloc", "neural"] }
+    {
+      "kind": "region",
+      "label": "src/ips/algorithms (Các Nhánh Thuật Toán Đăng Ký Factory)",
+      "wraps": ["rf_autoloc", "hierarchical", "kan_mixer", "llm", "huim"]
+    }
   ],
   "connections": [
-    { "id": "c_cli_run", "from": "cli", "to": "runner", "label": "thực thi" },
-    { "id": "c_run_fac", "from": "runner", "to": "factory", "label": "khởi tạo" },
-    { "id": "c_fac_macro", "from": "factory", "to": "macro_rf", "label": "tầng 1", "fromSide": "right", "toSide": "left", "via": [[710, 240], [710, 109]] },
-    { "id": "c_fac_micro", "from": "factory", "to": "micro_rf", "label": "tầng 2", "fromSide": "right", "toSide": "left", "via": [[710, 240], [710, 194]] },
-    { "id": "c_fac_auto", "from": "factory", "to": "autoloc", "label": "tầng 3", "fromSide": "right", "toSide": "left", "via": [[710, 240], [710, 279]] },
-    { "id": "c_fac_neu", "from": "factory", "to": "neural", "label": "đối chuẩn", "fromSide": "right", "toSide": "left", "via": [[710, 240], [710, 364]] },
-    { "id": "c_run_data", "from": "runner", "to": "data", "label": "nạp 8 bộ data", "fromSide": "bottom", "toSide": "top" },
-    { "id": "c_run_rep", "from": "runner", "to": "reports", "label": "xuất kết quả", "fromSide": "bottom", "toSide": "top", "via": [[355, 290], [615, 290]] }
+    {
+      "id": "c_cli_run",
+      "from": "cli",
+      "to": "runner",
+      "label": "thực thi"
+    },
+    {
+      "id": "c_run_fac",
+      "from": "runner",
+      "to": "factory",
+      "label": "khởi tạo"
+    },
+    {
+      "id": "c_fac_rf_auto",
+      "from": "factory",
+      "to": "rf_autoloc",
+      "label": "rf_autoloc",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_fac_hier",
+      "from": "factory",
+      "to": "hierarchical",
+      "label": "hierarchical"
+    },
+    {
+      "id": "c_fac_kan",
+      "from": "factory",
+      "to": "kan_mixer",
+      "label": "kan_mixer"
+    },
+    {
+      "id": "c_fac_llm",
+      "from": "factory",
+      "to": "llm",
+      "label": "llm"
+    },
+    {
+      "id": "c_fac_huim",
+      "from": "factory",
+      "to": "huim",
+      "label": "huim",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_run_data",
+      "from": "runner",
+      "to": "data",
+      "label": "nạp 8 bộ data",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c_run_rep",
+      "from": "runner",
+      "to": "reports",
+      "label": "xuất kết quả",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [[345, 300], [585, 300]]
+    }
   ],
   "cards": [
-    { "dot": "cyan", "title": "Điều Phối Thực Nghiệm (Orchestration)", "items": ["CLI kích hoạt ExperimentRunner qua các kịch bản thực nghiệm đa hạt giống (5-Run Protocol)", "Quản lý đánh giá độ chính xác, phân tích khuyết thiếu dữ liệu (Scarcity 20% - 100%)"] },
-    { "dot": "emerald", "title": "Kiến Trúc 3 Tầng RF + AutoLoC (100% Model Pipeline)", "items": ["Tầng 1 (Macro Lock): Random Forest phân loại khóa cứng Tòa nhà và Mặt sàn", "Tầng 2 (Micro RF): Mô hình hồi quy Random Forest chuyên biệt cho từng mặt sàn", "Tầng 3 (AutoLoC): Suy luận ngữ nghĩa không gian vật lý viễn thông, dung hợp Bayes thích ứng"] },
-    { "dot": "rose", "title": "Dữ Liệu Đa Benchmark & Báo Cáo Học Thuật", "items": ["Kiểm định độc lập trên toàn bộ 8 bộ dữ liệu thực tế (UJI, DLULIB, TUJI, SYL, HCXY, HUS, UJI Lib)", "Xuất báo cáo khoa học chi tiết, bảng tính Excel đa sheet và các tệp JSON thực nghiệm"] }
+    {
+      "dot": "cyan",
+      "title": "1. Điều Phối Thực Nghiệm (Experiment Runner)",
+      "items": [
+        "CLI kích hoạt ExperimentRunner theo các kịch bản thực nghiệm đa benchmark và khảo sát khuyết thiếu dữ liệu (Scarcity 20% - 100%)",
+        "Quản lý nạp dữ liệu từ 8 bộ benchmark thực tế và xuất kết quả, báo cáo kỹ thuật vào docs/Hoc/ và tệp bảng tính Excel"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "2. Cơ Chế Đăng Ký Thuật Toán (Algorithm Factory)",
+      "items": [
+        "AlgorithmFactory đóng vai trò Registry trung tâm, quản lý và khởi tạo động các lớp Algorithm kế thừa từ base.py",
+        "Đăng ký 4 thuật toán chính thức: rf_autoloc (Đề tài luận văn), hierarchical (RF thuần), kan_mixer (Mạng KAN), llm (AutoLoC zero-shot) và nhánh huim (Mở rộng)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "3. Nhánh Trọng Tâm Luận Văn (rf_autoloc: RF + AutoLoC)",
+      "items": [
+        "Mô hình lai ghép 100% Model Inference: Khóa Tòa/Tầng RF -> Hồi quy vi mô RF -> Tinh chỉnh không gian AutoLoC với Enhanced Prompt v2",
+        "Đạt độ chính xác cao: Mean 8.51m UJI Blind Test, 1.54m UJI Lib Tầng 5 (-11%), 2.47m TUJI và 4.15m DLULIB"
+      ]
+    }
   ]
 }
