@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Quy Trình Suy Luận Không Gian Ngữ Nghĩa Của AutoLoC LLM (Enhanced Prompt v2)",
+    "output": "architecture-llm-reasoning-flow-rendered.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "query_rssi",
+      "type": "external",
+      "label": "Vector RSSI Truy Vấn",
+      "sublabel": "Quét WAPs từ Smartphone",
+      "pos": [40, 230],
+      "size": [160, 64]
+    },
+    {
+      "id": "macro_rf",
+      "type": "backend",
+      "label": "Tầng 1: Khóa Tòa/Sàn RF",
+      "sublabel": "Khóa cứng (B_hat, F_hat) 91-100%",
+      "pos": [250, 130],
+      "size": [180, 64]
+    },
+    {
+      "id": "top_waps",
+      "type": "backend",
+      "label": "Top-3 WAPs LoS Trực Diện",
+      "sublabel": "Friis: d = 10^((-40-RSSI)/30)",
+      "pos": [250, 330],
+      "size": [180, 64]
+    },
+    {
+      "id": "subspace_retrieval",
+      "type": "database",
+      "label": "RAG Không Gian Con",
+      "sublabel": "M_(B, F): L1 + PCA 15D",
+      "pos": [490, 130],
+      "size": [180, 64]
+    },
+    {
+      "id": "top5_neighbors",
+      "type": "backend",
+      "label": "Top-5 Láng Giềng",
+      "sublabel": "SignalAffinity & OutlierDev",
+      "pos": [730, 130],
+      "size": [180, 64]
+    },
+    {
+      "id": "prompt_assembler",
+      "type": "backend",
+      "label": "Đóng Gói Prompt v2",
+      "sublabel": "LoS Mismatch + CoT 4 bước",
+      "pos": [730, 330],
+      "size": [180, 64]
+    },
+    {
+      "id": "ollama_llm",
+      "type": "cloud",
+      "label": "AutoLoC LLM Reasoning",
+      "sublabel": "CoT: LoS -> Damping -> Coords",
+      "pos": [980, 330],
+      "size": [190, 64]
+    },
+    {
+      "id": "convex_gate",
+      "type": "security",
+      "label": "Bộ Lọc Bao Lồi Convex Hull",
+      "sublabel": "Kẹp biên ±10m & Kiểm định sàn",
+      "pos": [1240, 130],
+      "size": [180, 64]
+    },
+    {
+      "id": "bayesian_fusion",
+      "type": "backend",
+      "label": "Dung Hợp Bayes Thích Ứng",
+      "sublabel": "Trọng số LoS-Affinity & uncertainty",
+      "pos": [1240, 330],
+      "size": [180, 64]
+    },
+    {
+      "id": "final_output",
+      "type": "frontend",
+      "label": "Tọa Độ Cuối (X*, Y*)",
+      "sublabel": "Tòa, Tầng, Tọa độ 2D, Bán kính",
+      "pos": [1490, 230],
+      "size": [170, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "1. Tiền Xử Lý & Khóa Không Gian (Macro Ingestion)",
+      "wraps": ["macro_rf", "top_waps"]
+    },
+    {
+      "kind": "region",
+      "label": "2. RAG Không Gian Con Mặt Sàn (Subspace RAG & Geometry)",
+      "wraps": ["subspace_retrieval", "top5_neighbors"]
+    },
+    {
+      "kind": "region",
+      "label": "3. Đóng Gói Prompt v2 & Suy Luận LLM (Spatial Reasoning)",
+      "wraps": ["prompt_assembler", "ollama_llm"]
+    },
+    {
+      "kind": "region",
+      "label": "4. Hậu Kiểm An Toàn & Dung Hợp Bayes (Bayesian Synthesis)",
+      "wraps": ["convex_gate", "bayesian_fusion", "final_output"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "query_rssi",
+      "to": "macro_rf",
+      "label": "RSSI dương",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[225, 262], [225, 162]]
+    },
+    {
+      "id": "c2",
+      "from": "query_rssi",
+      "to": "top_waps",
+      "label": "RSSI gốc",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[225, 262], [225, 362]]
+    },
+    {
+      "id": "c3",
+      "from": "macro_rf",
+      "to": "subspace_retrieval",
+      "label": "khóa (B,F)",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "c4",
+      "from": "subspace_retrieval",
+      "to": "top5_neighbors",
+      "label": "L1 + PCA",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "c5",
+      "from": "top5_neighbors",
+      "to": "prompt_assembler",
+      "label": "5 mốc neo",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c6",
+      "from": "top_waps",
+      "to": "prompt_assembler",
+      "label": "3 APs LoS (cự ly d)",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "c7",
+      "from": "prompt_assembler",
+      "to": "ollama_llm",
+      "label": "Prompt v2",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "c8",
+      "from": "ollama_llm",
+      "to": "convex_gate",
+      "label": "tọa độ thô",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[1205, 362], [1205, 162]]
+    },
+    {
+      "id": "c9",
+      "from": "convex_gate",
+      "to": "bayesian_fusion",
+      "label": "tọa độ hợp lệ",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "c10",
+      "from": "bayesian_fusion",
+      "to": "final_output",
+      "label": "xuất (X*, Y*)",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [[1455, 362], [1455, 262]]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "1. Ngữ Cảnh Nâng Cấp Của Enhanced Prompt v2",
+      "items": [
+        "Mô hình hóa cự ly truyền sóng LoS theo phương trình Friis: d = 10^((-40 - RSSI)/30) giúp LLM hiểu khoảng cách mét thực",
+        "Trích xuất Top-3 WAP có RSSI mạnh nhất và đo lường độ lệch Line-of-Sight (LoS Mismatch) để loại trừ trạm phát bị tường chắn",
+        "Chuẩn hóa độ tương đồng tín hiệu SignalAffinity [0, 1] và cảnh báo lệch tâm OutlierDev = ||p_k - P_med|| so với mỏ neo 3 điểm"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "2. Chuỗi Tư Duy Suy Luận CoT (Chain-of-Thought)",
+      "items": [
+        "Bước 1 (LoS Calibration): Kiểm tra độ khớp công suất trên AP phát thẳng để xác nhận láng giềng cùng phòng/hành lang",
+        "Bước 2 (Spatial Outlier Damping): Triệt tiêu lực hút của các điểm có OutlierDev > 10m nhằm chống hiện tượng đâm xuyên tường",
+        "Bước 3 & 4 (Nội suy & Bán kính bất định): Nội suy tọa độ vi mô và tự đánh giá bán kính tin cậy (uncertainty_radius_m)"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "3. Hậu Kiểm Bao Lồi & Dung Hợp Bayes Thích Ứng",
+      "items": [
+        "Bộ lọc Convex Hull kẹp biên tọa độ trong phạm vi ±10m bao lồi của 5 láng giềng tham chiếu, loại bỏ hoàn toàn hallucination",
+        "Dung hợp Bayes thích ứng dựa trên trọng số LoS-Affinity: w = w_base * exp(-Delta_LoS / sigma_LoS)",
+        "Đạt độ chính xác cao: Mean 8.51m UJI Blind Test, 1.54m UJI Lib Tầng 5 (-11%), 2.47m TUJI và 4.15m DLULIB"
+      ]
+    }
+  ]
+}
+
