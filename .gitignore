@@ -20,6 +20,7 @@ diagram-design/
 # Documentation and research references are personal, retained on this machine.
 /docs/
 /references/
+/references.zip
 # Guard former personal paths if historical files are restored manually.
 /configs/base.json
 /configs/experiments/mlp_smoke.json
