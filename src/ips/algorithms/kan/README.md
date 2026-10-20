@@ -136,3 +136,32 @@ FastKAN/S-KAN chưa được triển khai trong nhánh này.
 Chi tiết từng file và giới hạn: [Giải thích thay đổi](GIAI_THICH_THAY_DOI_2026-10-09.md).
 
 [Hợp đồng Algorithm](../base.py) · [README dự án](../../../../README.md).
+
+## UJI huấn luyện riêng từng tòa
+
+`uji_buildings.py` chạy ba KAN-Mixer tham chiếu riêng cho building 0, 1, 2 ở
+mỗi seed 42/43/44. Giữ nguyên các dòng của split `uji_group_split_v1`, 520 AP
+và cấu hình training `accuracy_spatial`; tâm/scale tọa độ và catalogue chỉ fit
+từ train của từng tòa. Đây là điều kiện **đã biết tòa** để chọn mạng, không phải
+hệ thống tự nhận diện tòa từ RSSI. Đơn vị vật lý của sigma 0,05 chuẩn hóa cũng
+thay đổi theo scale mỗi tòa nên chưa phải ablation chỉ thay số lượng mạng.
+
+```powershell
+python -m ips.algorithms.kan.uji_buildings prepare --output-dir runs/uji_buildings_new
+python -u -m ips.algorithms.kan.uji_buildings train --output-dir runs/uji_buildings_new --device cuda
+python -u -m ips.algorithms.kan.uji_buildings evaluate --output-dir runs/uji_buildings_new --device cuda
+python -m ips.algorithms.kan.uji_buildings_report --output-dir runs/uji_buildings_new
+```
+
+`train --smoke --device cpu` kiểm tra riêng trên ít mẫu, không tạo checkpoint
+dùng đánh giá test. `evaluate` đợi đủ chín checkpoint pure đã khóa; decoder
+cuối kế thừa cấu hình UJI theo seed. Không hiệu chỉnh lại trên test. Các file
+training/calibration UJI cũ trong `runs/` là điều kiện cần và được ghi hash vào
+protocol. Mỗi output-dir phải mới; các checkpoint/kết quả cũ được giữ nguyên.
+
+Báo cáo gồm mạng riêng, mạng chung gốc và đối chứng mạng chung biết tòa (chỉ
+giới hạn lớp trong decoder, không đổi trọng số). Mean 2D từng tòa được tính trên
+cùng các dòng test. Với mỗi seed, tính trung bình đều ba mean, sau đó mới tổng
+hợp mean/SD qua seed; xuất thêm trung bình theo số mẫu và predictions CSV để
+kiểm tra lại. Test UJI đã được xem trong các thực nghiệm trước nên đây là lượt
+thăm dò tiếp theo, không phải đánh giá trên một test mới chưa từng được xem.
