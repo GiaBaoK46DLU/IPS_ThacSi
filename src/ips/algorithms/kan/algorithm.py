@@ -116,6 +116,11 @@ class KANMixerAlgorithm(Algorithm):
                     f"{mixer['blocks']} blocks")
         if settings.get("positioning", {}).get("variant") == "reference":
             backbone += f"; {len(settings['positioning']['references'])} train reference points"
+            backbone += '; input=' + settings['positioning'].get('input_mode','absolute_mask')
+            if settings['positioning'].get('head_transform') == 'kan':
+                backbone += '; internal KAN B-spline prediction head'
+            if settings['positioning'].get('coordinate_residual_scale',0):
+                backbone += '; internal bounded KAN coordinate residual head'
         if "ensemble_members" in self._checkpoint:
             backbone += f"; ensemble of {len(self._checkpoint['ensemble_members'])} KAN-Mixers"
         if "fingerprint_refinement" in self._checkpoint:
