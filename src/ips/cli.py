@@ -52,8 +52,12 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.command == "algorithms":
         from .experiments.factory import default_factory
-        print("Implemented: " + ", ".join(default_factory().available_ids()))
-        print("Not implemented: llm, huim, FastKAN, S-KAN")
+        factory = default_factory()
+        print("Implemented: " + ", ".join(factory.available_ids()))
+        missing = [display for name, display in (("llm", "llm"), ("huim", "huim"),
+                   ("fastkan", "FastKAN"), ("s_kan", "S-KAN"))
+                   if name not in factory.available_ids()]
+        print("Not implemented: " + ", ".join(missing))
     elif args.command == "run":
         from .experiments.contracts import ExperimentConfig
         from .experiments.runner import ExperimentRunner
@@ -75,9 +79,11 @@ def main(argv=None):
         config = read_config(args.config)
         device = configure_runtime(42, args.device, config["training"]["threads"])
         bundle = load_bundle(ROOT / config["split_dir"])
+        reference_train = None
         if config.get("positioning", {}).get("variant") == "reference":
             from .algorithms.kan.models.reference import fit_reference_points
-            fit_reference_points(config, FingerprintDataset.from_split(bundle.split("train")))
+            reference_train = FingerprintDataset.from_split(bundle.split("train"))
+            fit_reference_points(config, reference_train)
         features = FingerprintDataset.from_split(bundle.split("train", limit=2)).features.to(device)
         counts = {}
         for name in ["kan_mixer"]:
