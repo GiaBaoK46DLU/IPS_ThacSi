@@ -77,6 +77,10 @@ def build_model(config: dict, classes: int = 13) -> nn.Module:
             raise ValueError("Protocol v1 fixes grid and uses no extra KAN regularization loss.")
         variant = config.get("positioning", {}).get("variant", "regression_v1")
         if variant == "reference":
+            head_type = config.get('positioning',{}).get('head_type','point_classifier')
+            if head_type != 'point_classifier':
+                raise ValueError(f'Only the KAN-Mixer point_classifier head is supported; received {head_type}. '
+                                 'Fingerprint retrieval/memory is excluded from this research.')
             from .reference import ReferenceKANMixer
             return ReferenceKANMixer(config, classes)
         if variant != "regression_v1":
