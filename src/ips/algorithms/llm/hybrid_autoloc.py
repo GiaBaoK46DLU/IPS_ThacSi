@@ -83,7 +83,7 @@ Task: Analyze physical signal continuity among the floor-locked neighbors and re
         idw_exponent: float = 2.0,
         spatial_sigma: float = 25.0,
         llm_gate_threshold: float = 50.0,
-        model_name: str = "llama3.2:1b",
+        model_name: str = "qwen2.5:3b",
         ollama_url: str = "http://localhost:11434/api/generate",
         seed: int = 42,
     ):

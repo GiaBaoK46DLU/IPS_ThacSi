@@ -2,8 +2,8 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Quy Trình Suy Luận Không Gian Ngữ Nghĩa Của AutoLoC LLM (Enhanced Prompt v2)",
-    "output": "architecture-llm-reasoning-flow-rendered.html",
+    "title": "Kiến Trúc Mô Hình Lai Ghép RF + AutoLoC V4 (Hierarchical ExtraTrees & Pareto Spatial Engine)",
+    "output": "architecture-rf-autoloc-v4-rendered.html",
     "quality_profile": "showcase"
   },
   "components": [
@@ -16,10 +16,10 @@
       "size": [160, 64]
     },
     {
-      "id": "macro_rf",
+      "id": "macro_extratrees",
       "type": "backend",
-      "label": "Tầng 1: Khóa Tòa/Sàn RF",
-      "sublabel": "Khóa cứng (B_hat, F_hat) 91-100%",
+      "label": "Khóa Tòa/Sàn ExtraTrees",
+      "sublabel": "Max-Rel X^4: Sàn 95.23%",
       "pos": [250, 130],
       "size": [180, 64]
     },
@@ -32,34 +32,34 @@
       "size": [180, 64]
     },
     {
-      "id": "subspace_retrieval",
+      "id": "subspace_memory",
       "type": "database",
-      "label": "RAG Không Gian Con",
-      "sublabel": "M_(B, F): L1 + PCA 15D",
+      "label": "RAG Cắt Tỉa Không Gian Con",
+      "sublabel": "M_(B, F) Pareto: Cos + PCA",
       "pos": [490, 130],
       "size": [180, 64]
     },
     {
-      "id": "top5_neighbors",
+      "id": "top_neighbors",
       "type": "backend",
-      "label": "Top-5 Láng Giềng",
-      "sublabel": "SignalAffinity & OutlierDev",
+      "label": "Top-11 Láng Giềng Không Gian",
+      "sublabel": "Cosine p=2.5 & OutlierDev",
       "pos": [730, 130],
       "size": [180, 64]
     },
     {
       "id": "prompt_assembler",
       "type": "backend",
-      "label": "Đóng Gói Prompt v2",
-      "sublabel": "LoS Mismatch + CoT 4 bước",
+      "label": "Đóng Gói Prompt CoT v4",
+      "sublabel": "LoS Mismatch + Damping",
       "pos": [730, 330],
       "size": [180, 64]
     },
     {
-      "id": "ollama_llm",
-      "type": "cloud",
-      "label": "AutoLoC LLM Reasoning",
-      "sublabel": "CoT: LoS -> Damping -> Coords",
+      "id": "qwen_gpu_llm",
+      "type": "backend",
+      "label": "AutoLoC LLM (Qwen 2.5 GPU)",
+      "sublabel": "PyTorch FP16: CoT 4 bước",
       "pos": [980, 330],
       "size": [190, 64]
     },
@@ -67,7 +67,7 @@
       "id": "convex_gate",
       "type": "security",
       "label": "Bộ Lọc Bao Lồi Convex Hull",
-      "sublabel": "Kẹp biên ±10m & Kiểm định sàn",
+      "sublabel": "Kẹp biên ±10m láng giềng",
       "pos": [1240, 130],
       "size": [180, 64]
     },
@@ -75,7 +75,7 @@
       "id": "bayesian_fusion",
       "type": "backend",
       "label": "Dung Hợp Bayes Thích Ứng",
-      "sublabel": "Trọng số LoS-Affinity & uncertainty",
+      "sublabel": "Trọng số LoS-Affinity",
       "pos": [1240, 330],
       "size": [180, 64]
     },
@@ -83,7 +83,7 @@
       "id": "final_output",
       "type": "frontend",
       "label": "Tọa Độ Cuối (X*, Y*)",
-      "sublabel": "Tòa, Tầng, Tọa độ 2D, Bán kính",
+      "sublabel": "Tòa, Tầng, Tọa độ, Bán kính",
       "pos": [1490, 230],
       "size": [170, 64]
     }
@@ -91,18 +91,18 @@
   "boundaries": [
     {
       "kind": "region",
-      "label": "1. Tiền Xử Lý & Khóa Không Gian (Macro Ingestion)",
-      "wraps": ["macro_rf", "top_waps"]
+      "label": "1. Tiền Xử Lý Bất Biến & Khóa Không Gian (Macro Ingestion)",
+      "wraps": ["macro_extratrees", "top_waps"]
     },
     {
       "kind": "region",
-      "label": "2. RAG Không Gian Con Mặt Sàn (Subspace RAG & Geometry)",
-      "wraps": ["subspace_retrieval", "top5_neighbors"]
+      "label": "2. RAG Không Gian Con Mặt Sàn (Subspace RAG & Pareto)",
+      "wraps": ["subspace_memory", "top_neighbors"]
     },
     {
       "kind": "region",
-      "label": "3. Đóng Gói Prompt v2 & Suy Luận LLM (Spatial Reasoning)",
-      "wraps": ["prompt_assembler", "ollama_llm"]
+      "label": "3. Đóng Gói Prompt v4 & Suy Luận LLM GPU (Spatial Reasoning)",
+      "wraps": ["prompt_assembler", "qwen_gpu_llm"]
     },
     {
       "kind": "region",
@@ -114,7 +114,7 @@
     {
       "id": "c1",
       "from": "query_rssi",
-      "to": "macro_rf",
+      "to": "macro_extratrees",
       "label": "RSSI dương",
       "fromSide": "right",
       "toSide": "left",
@@ -131,8 +131,8 @@
     },
     {
       "id": "c3",
-      "from": "macro_rf",
-      "to": "subspace_retrieval",
+      "from": "macro_extratrees",
+      "to": "subspace_memory",
       "label": "khóa (B,F)",
       "variant": "emphasis",
       "fromSide": "right",
@@ -140,17 +140,17 @@
     },
     {
       "id": "c4",
-      "from": "subspace_retrieval",
-      "to": "top5_neighbors",
+      "from": "subspace_memory",
+      "to": "top_neighbors",
       "label": "L1 + PCA",
       "fromSide": "right",
       "toSide": "left"
     },
     {
       "id": "c5",
-      "from": "top5_neighbors",
+      "from": "top_neighbors",
       "to": "prompt_assembler",
-      "label": "5 mốc neo",
+      "label": "11 mốc neo",
       "fromSide": "bottom",
       "toSide": "top"
     },
@@ -165,15 +165,15 @@
     {
       "id": "c7",
       "from": "prompt_assembler",
-      "to": "ollama_llm",
-      "label": "Prompt v2",
+      "to": "qwen_gpu_llm",
+      "label": "Prompt v4",
       "variant": "emphasis",
       "fromSide": "right",
       "toSide": "left"
     },
     {
       "id": "c8",
-      "from": "ollama_llm",
+      "from": "qwen_gpu_llm",
       "to": "convex_gate",
       "label": "tọa độ thô",
       "fromSide": "right",
@@ -203,31 +203,30 @@
   "cards": [
     {
       "dot": "cyan",
-      "title": "1. Ngữ Cảnh Nâng Cấp Của Enhanced Prompt v2",
+      "title": "1. Tiền Xử Lý Bất Biến & Khóa Tầng ExtraTrees (V4)",
       "items": [
-        "Mô hình hóa cự ly truyền sóng LoS theo phương trình Friis: d = 10^((-40 - RSSI)/30) giúp LLM hiểu khoảng cách mét thực",
-        "Trích xuất Top-3 WAP có RSSI mạnh nhất và đo lường độ lệch Line-of-Sight (LoS Mismatch) để loại trừ trạm phát bị tường chắn",
-        "Chuẩn hóa độ tương đồng tín hiệu SignalAffinity [0, 1] và cảnh báo lệch tâm OutlierDev = ||p_k - P_med|| so với mỏ neo 3 điểm"
+        "Chuẩn hóa Max-Relative RSSI: X_rel = X_pos / max(X_pos) triệt tiêu hoàn toàn độ lệch công suất thu phát phần cứng (±10 dBm)",
+        "Lũy thừa bậc 4 (X_rel^4) khuếch đại độ tương phản cực đại, triệt tiêu nhiễu đa đường (multipath) từ các AP ở xa",
+        "Bộ phân loại ExtraTrees (300 cây ngẫu nhiên hóa) trên không gian tích hợp Tòa-Tầng nâng độ chính xác tầng UJI từ 91.00% lên 95.23% (Tòa 100%)"
       ]
     },
     {
       "dot": "emerald",
-      "title": "2. Chuỗi Tư Duy Suy Luận CoT (Chain-of-Thought)",
+      "title": "2. Cắt Tỉa Bộ Nhớ Pareto & LLM Chuyên Biệt Trên GPU",
       "items": [
-        "Bước 1 (LoS Calibration): Kiểm tra độ khớp công suất trên AP phát thẳng để xác nhận láng giềng cùng phòng/hành lang",
-        "Bước 2 (Spatial Outlier Damping): Triệt tiêu lực hút của các điểm có OutlierDev > 10m nhằm chống hiện tượng đâm xuyên tường",
-        "Bước 3 & 4 (Nội suy & Bán kính bất định): Nội suy tọa độ vi mô và tự đánh giá bán kính tin cậy (uncertainty_radius_m)"
+        "Cắt tỉa 50% dữ liệu bộ nhớ vector mốc tham chiếu theo phân bố mật độ, giảm 50% RAM/tính toán mà sai số chỉ lệch +0.10m (7.00m so với 6.90m)",
+        "Sai số phân vị P90 ở mức 50% bộ nhớ thậm chí tốt hơn 100% data (14.96m so với 15.55m) nhờ loại bỏ các mẫu nhiễu ngoại lai",
+        "Thay thế Ollama CPU 1B bằng Qwen 2.5 (3B Instruct) chạy trên GPU VRAM (RTX 3050 Ti FP16) giúp lập luận hình học không gian sâu sắc và chính xác vượt bậc"
       ]
     },
     {
       "dot": "violet",
-      "title": "3. Hậu Kiểm Bao Lồi & Dung Hợp Bayes Thích Ứng",
+      "title": "3. Hiệu Quả Đột Phá Đa Benchmark Của Mô Hình V4",
       "items": [
-        "Bộ lọc Convex Hull kẹp biên tọa độ trong phạm vi ±10m bao lồi của 5 láng giềng tham chiếu, loại bỏ hoàn toàn hallucination",
-        "Dung hợp Bayes thích ứng dựa trên trọng số LoS-Affinity: w = w_base * exp(-Delta_LoS / sigma_LoS)",
-        "Đạt độ chính xác cao: Mean 8.51m UJI Blind Test, 1.54m UJI Lib Tầng 5 (-11%), 2.47m TUJI và 4.15m DLULIB"
+        "UJI Blind Test quốc tế (N=1,111): Mean Error giảm từ 8.27m về 6.90m (-1.37m, -16.6%), Median 4.54m, P90 15.55m",
+        "Đồng loạt bứt phá trên toàn bộ 8 benchmark: DLULIB phá vỡ mốc 4m (Mean 3.94m), HCXY đạt 1.84m, SYL 4.00m, HUS 0.05m",
+        "Chuỗi tư duy CoT 4 bước (Friis LoS -> Damping lệch tâm -> Nội suy -> Đánh giá bán kính tin cậy) kết hợp bộ lọc Convex Hull chống hoàn toàn hallucination"
       ]
     }
   ]
 }
-

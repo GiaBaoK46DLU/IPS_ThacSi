@@ -88,7 +88,7 @@ Output STRICTLY a single JSON object with these exact keys and types:
         n_neighbors: int = 5,
         missing_val: float = 100.0,
         replace_val: float = -105.0,
-        model_name: str = "llama3.2:1b",
+        model_name: str = "qwen2.5:3b",
         ollama_url: str = "http://localhost:11434/api/generate",
         seed: int = 42,
     ):

@@ -1,4 +1,4 @@
-﻿.venv/
+.venv/
 .venv-cuda/
 __pycache__/
 *.py[cod]
@@ -8,6 +8,7 @@ runs/
 /build/
 /dist/
 *.whl
+*.zip
 .DS_Store
 # Temporary owner files created when Office documents are open.
 ~$*
@@ -18,7 +19,9 @@ diagram-design/
 # Personal baseline study and archives: kept locally.
 /personal_learning/
 # Documentation and research references are personal, retained on this machine.
-/docs/
+/docs/*
+!/docs/Hoc/
+!/docs/architecture/
 /references/
 /references.zip
 # Guard former personal paths if historical files are restored manually.

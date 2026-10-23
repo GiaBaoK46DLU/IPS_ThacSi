@@ -41,7 +41,7 @@ class LLMAutoLoCAlgorithm(LLMAlgorithm):
     def __init__(self, config: ExperimentConfig):
         super().__init__(config)
         params = self.config.params or {}
-        self.model_name = params.get("model", "llama3.2:1b")
+        self.model_name = params.get("model", "qwen2.5:3b")
         self.ollama_url = params.get("ollama_url", "http://localhost:11434/api/generate")
         self.n_components = params.get("n_components", 15)
         self.n_neighbors = params.get("n_neighbors", 5)
