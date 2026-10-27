@@ -4,6 +4,8 @@
 *.ps1 text eol=lf
 data/** -text
 src/ips/** -text
+# V2 input is an exact copy of the historical CRLF configuration receipt.
+src/ips/algorithms/kan/configs/v2_reference_reproduction.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 reports/** -text
 *.png binary
 *.pdf binary

@@ -1,2 +1,0 @@
-# Preserve the exact bytes of copied scientific receipts and their SHA256 values.
-*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
