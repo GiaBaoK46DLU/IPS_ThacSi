@@ -2,8 +2,8 @@
 
 Ngày bắt đầu: 26/10/2026. Nhánh: `kan-version-4`.
 
-Bản bàn giao để review: [báo cáo Word V4](../../../../docs/Hoc/KAN_V4/IPS_KAN_V4.docx)
-và [kết quả tổng hợp cùng receipt kiểm toán](../../../../docs/Hoc/KAN_V4/README.md).
+Báo cáo Word V4 và các receipt được giữ cục bộ tại `docs/Bao/KAN_V4/`.
+Thư mục `docs/Bao/` được ignore theo yêu cầu của chủ dự án và không nằm trong PR.
 Checkpoint, dữ liệu và CSV trong `runs/` tiếp tục được giữ cục bộ theo quy ước repository.
 
 Người dùng cho phép nghiên cứu và thực nghiệm nhằm đạt **mean2D Test < 7 m**.

@@ -21,6 +21,7 @@ diagram-design/
 # Documentation and research references are personal, retained on this machine.
 /docs/*
 !/docs/Hoc/
+/docs/Bao/
 !/docs/architecture/
 /references/
 /references.zip
