@@ -74,6 +74,8 @@ def fit_reference_points(config, dataset, *, final_refit=False):
         {"class_id": int(c), "xy": lookup[(int(c), float(x), float(y))]}
         for c, x, y in points]
     settings["fit_scope"] = "development_after_validation_selection" if final_refit else "internal_train_only"
+    from ..v4_methods import fit_ap_groups
+    fit_ap_groups(config, dataset, final_refit=final_refit)
 
 
 class ReferenceKANMixer(nn.Module):
@@ -102,6 +104,12 @@ class ReferenceKANMixer(nn.Module):
         self.register_buffer("catalogue_indices", indices, persistent=False)
         self.register_buffer("catalogue_valid", valid, persistent=False)
         self.classes, self.settings = classes, settings
+        if settings.get('ap_grouping', 'source_order') != 'source_order':
+            from ..v4_methods import validate_permutation
+            validate_permutation(settings.get('ap_permutation'))
+            if settings.get('ap_permutation_fit_scope') != 'internal_train_only':
+                raise ValueError('AP grouping must be fitted on internal training data.')
+            self.register_buffer('ap_permutation', torch.tensor(settings['ap_permutation']), persistent=False)
         if (not 0 <= settings.get("ap_dropout", 0) < 1 or settings.get("mask_scale", 0) < 0
                 or settings.get("rssi_noise_db", 0) < 0 or settings.get("device_shift_db", 0) < 0):
             raise ValueError("Invalid RSSI augmentation or mask scale.")
@@ -189,6 +197,8 @@ class ReferenceKANMixer(nn.Module):
                 mask = mask * (torch.rand_like(mask) >= drop)
             signal = signal.clamp(0, 1) * mask
         transformed = represent_signal(signal, mask, self.settings)
+        if hasattr(self, 'ap_permutation'):
+            transformed = transformed[:, self.ap_permutation]
         patches = transformed.reshape(len(features), self.tokens, self.features_per_token)
         x = self.final_norm(self.blocks(self.embedding(patches)))
         if self.pooling == "flatten":

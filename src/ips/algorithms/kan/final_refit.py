@@ -119,8 +119,11 @@ def refit(source_checkpoint, selection_path, run_dir, seed, device_name="cuda"):
     consistency_weight = settings.get("same_point_consistency_weight",0.)
     from .augmentation import training_representation
     loader_data = training_representation(dataset, settings, final_refit=True)
-    loader = DataLoader(loader_data, batch_size=settings["batch_size"], shuffle=True, num_workers=0,
-                        generator=torch.Generator().manual_seed(seed))
+    from .v4_methods import point_sampler
+    generator = torch.Generator().manual_seed(seed)
+    sampler = point_sampler(dataset, settings, generator)
+    loader = DataLoader(loader_data, batch_size=settings["batch_size"], shuffle=sampler is None,
+                        sampler=sampler, num_workers=0, generator=generator)
     ema_decay = settings.get("ema_decay", 0.0)
     if ema_decay and not 0 < ema_decay < 1:
         raise ValueError("EMA decay must be strictly between zero and one.")

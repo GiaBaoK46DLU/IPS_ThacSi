@@ -63,6 +63,12 @@ def combined_loss(output, classes, xy, settings):
         if "auxiliary_logits" in output:
             loss = loss + settings.get("lambda_auxiliary_class", 0.5) * nn.functional.cross_entropy(
                 output["auxiliary_logits"], classes)
+        risk_weight = settings.get('lambda_spatial_risk', 0.)
+        if not math.isfinite(risk_weight) or risk_weight < 0:
+            raise ValueError('lambda_spatial_risk must be finite and nonnegative.')
+        if risk_weight:
+            from .v4_methods import spatial_risk
+            loss = loss + risk_weight * spatial_risk(output, xy)
         return loss, classification + reference_loss, coordinate
     coordinate = nn.functional.smooth_l1_loss(output["xy"], xy, beta=settings["smooth_l1_beta"])
     return classification + settings["lambda_xy"] * coordinate, classification, coordinate
@@ -116,8 +122,10 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     consistency_weight = settings.get("same_point_consistency_weight", 0.)
     from .augmentation import training_representation
     loader_data = training_representation(train_data, settings)
-    train_loader = DataLoader(loader_data, batch_size=settings["batch_size"], shuffle=True,
-                              num_workers=0, generator=generator)
+    from .v4_methods import point_sampler
+    sampler = point_sampler(train_data, settings, generator)
+    train_loader = DataLoader(loader_data, batch_size=settings["batch_size"], shuffle=sampler is None,
+                              sampler=sampler, num_workers=0, generator=generator)
     validation_loader = DataLoader(validation_data, batch_size=settings["batch_size"], shuffle=False, num_workers=0)
     # KAN initialization (CPU lstsq) occurs before moving to GPU.
     model = build_model(config, len(bundle.classes)).to(device)
@@ -136,6 +144,7 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     training_files += ["algorithms/kan/" + name for name in
         ["algorithm.py", "dataset.py", "train.py", "predict.py", "runtime.py", "resources.py", "diagnostics.py",
          "models/networks.py", "models/vendor/efficient_kan.py"]]
+    training_files.append('algorithms/kan/v4_methods.py')
     if config.get("positioning", {}).get("variant") == "reference":
         training_files.append("algorithms/kan/models/reference.py")
     if settings.get("same_point_mixing", 0) or consistency_weight or settings.get('nearby_point_mixing', 0):
