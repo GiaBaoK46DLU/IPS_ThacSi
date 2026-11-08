@@ -123,7 +123,7 @@ class ReferenceKANMixer(nn.Module):
         width = mixer["channels"]
         self.embedding = nn.Linear(self.features_per_token, width)
         self.blocks = nn.Sequential(*[MixerBlock(self.tokens, width, mixer["token_hidden"],
-            mixer["channel_hidden"], mixer["dropout"], kan) for _ in range(mixer["blocks"])])
+            mixer["channel_hidden"], mixer["dropout"], kan, f'blocks.{index}') for index in range(mixer["blocks"])])
         self.final_norm = nn.LayerNorm(width)
         self.pooling = settings.get("pooling", "flatten")
         if self.pooling not in ("flatten", "mean", "learned"):

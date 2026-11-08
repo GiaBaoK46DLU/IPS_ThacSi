@@ -19,7 +19,13 @@ class PositionHeads(nn.Module):
                 "xy": self.coordinates(representation)}
 
 
-def mixing_branch(width: int, hidden: int, dropout: float, kan: dict):
+def mixing_branch(width: int, hidden: int, dropout: float, kan: dict, prefix: str = ''):
+    if kan.get('backend') == 'selectable':
+        from ..variants.selectable.layers import make_selectable_layer
+        return nn.Sequential(make_selectable_layer(width, hidden, kan, prefix + '.0'), nn.Dropout(dropout),
+                             make_selectable_layer(hidden, width, kan, prefix + '.2'), nn.Dropout(dropout))
+    if kan.get('backend', 'efficient_kan') != 'efficient_kan':
+        raise ValueError('Unknown KAN backend.')
     options = {key: kan[key] for key in ["grid_size", "spline_order", "scale_noise", "scale_base",
                 "scale_spline", "enable_standalone_scale_spline", "grid_eps", "grid_range"]}
     # KANLinear đã có base SiLU và spline học được. Không chèn GELU giữa hai KAN.
@@ -29,12 +35,12 @@ def mixing_branch(width: int, hidden: int, dropout: float, kan: dict):
 
 class MixerBlock(nn.Module):
     def __init__(self, tokens: int, channels: int, token_hidden: int,
-                 channel_hidden: int, dropout: float, kan: dict):
+                 channel_hidden: int, dropout: float, kan: dict, prefix: str = ''):
         super().__init__()
         self.token_norm = nn.LayerNorm(channels)
-        self.token_mixer = mixing_branch(tokens, token_hidden, dropout, kan)
+        self.token_mixer = mixing_branch(tokens, token_hidden, dropout, kan, prefix + '.token_mixer')
         self.channel_norm = nn.LayerNorm(channels)
-        self.channel_mixer = mixing_branch(channels, channel_hidden, dropout, kan)
+        self.channel_mixer = mixing_branch(channels, channel_hidden, dropout, kan, prefix + '.channel_mixer')
 
     def forward(self, x):
         # [B,T,C] -> [B,C,T]: mỗi channel dùng chung phép trộn T tokens.

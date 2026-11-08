@@ -1,0 +1,16 @@
+{
+  "method": "Activation Space Selectable Kolmogorov-Arnold Networks",
+  "paper": "https://arxiv.org/abs/2408.08338v1",
+  "implementation": "independent IPS adaptation of per-input-node full/selective/prune Algorithm 1",
+  "authors_code_status_at_review": "arXiv v1 promises future code; no official factory supplied",
+  "pool": "explicit IPS 18-candidate pool; not asserted identical to authors' undisclosed 18 implementations",
+  "selection_parameterization": "masked softmax logits, shared across outgoing edges of each input node",
+  "spline_dependency": "existing project MIT efficient-kan vendor, see models/vendor/provenance.json",
+  "basis_definition_references": [
+    "https://github.com/ZiyaoLi/fast-kan",
+    "https://github.com/zavareh1/Wav-KAN",
+    "https://github.com/quiqi/relu_kan",
+    "https://github.com/IvanDrokin/torch-conv-kan"
+  ],
+  "adaptations": ["SiLU base path for every candidate", "no extra per-candidate LayerNorm", "Gram recurrence initialized discrete coefficients and learned per input", "real Shannon bandpass 2*sinc(2u)-sinc(u)", "Meyer-inspired compact real window; not full inverse Fourier Meyer wavelet", "masked softmax selector", "full-layer fan-in initialization after physical grouping", "AdamW reset each full/selective phase"]
+}
