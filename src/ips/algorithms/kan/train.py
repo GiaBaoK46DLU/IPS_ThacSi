@@ -149,6 +149,11 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
         training_files.append("algorithms/kan/models/reference.py")
     if settings.get("same_point_mixing", 0) or consistency_weight or settings.get('nearby_point_mixing', 0):
         training_files.append("algorithms/kan/augmentation.py")
+    kan_provenance = Path(__file__).parent / 'models/vendor/provenance.json'
+    if config['kan'].get('backend') == 'selectable':
+        kan_provenance = Path(__file__).parent / 'variants/selectable/provenance.json'
+        training_files += [p.relative_to(ROOT / 'src/ips').as_posix()
+                           for p in sorted(kan_provenance.parent.glob('*.py'))]
     metadata = {"run_type": "smoke_check" if smoke else "training",
         "seed": seed, "config": config, "resolved_max_epochs": max_epochs,
         "actual_counts": {"train": len(train_data), "validation": len(validation_data)},
@@ -156,7 +161,7 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
         "split_manifest_sha256": sha256(bundle.directory / "manifest.json"),
         "split_manifest": bundle.manifest, "code_sha256": hashes,
         "training_implementation_sha256": {"src/ips/" + name: hashes["src/ips/" + name] for name in training_files},
-        "kan_source": json.loads((Path(__file__).parent / "models/vendor/provenance.json").read_text()),
+        "kan_source": json.loads(kan_provenance.read_text(encoding='utf-8')),
         "selection": "internal_validation_mean_2d", "test_evaluated_during_training": False}
     metadata["selection_weights"] = "train_step_ema" if ema_model is not None else "live_model"
     metadata["training_views_per_dataset_row"] = 2 if consistency_weight else 1
