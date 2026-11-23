@@ -50,7 +50,27 @@ def represent_signal(signal, mask, settings):
     if mode == "relative_rank_mask":
         return torch.stack([relative, observed_signal_rank(signal, mask),
                             mask * settings.get("mask_scale", 1.0)], -1)
+    if mode == "rank_mask":
+        # Invariant to any strictly increasing per-device RSSI distortion.
+        return torch.stack([observed_signal_rank(signal, mask), mask * settings.get("mask_scale", 1.0)], -1)
     raise ValueError(f"Unknown RSSI input_mode: {mode}")
+
+
+def building_floor_mixture(logits, conditional_xy, class_buildings):
+    """Posterior-mean 2D position over the floors of the most probable building.
+
+    p(c|x) = softmax(logits); b* = argmax_b sum_{c in b} p(c|x);
+    xy = sum_{c in b*} p(c|x) conditional_xy[c] / sum_{c in b*} p(c|x).
+    The predicted building/floor label is unchanged (argmax class).
+    """
+    probability = logits.softmax(1)
+    buildings = int(class_buildings.max()) + 1
+    per_building = torch.zeros(len(probability), buildings, device=probability.device,
+                               dtype=probability.dtype).index_add_(1, class_buildings, probability)
+    chosen = per_building.argmax(1)
+    weights = probability * (class_buildings[None] == chosen[:, None])
+    weights = weights / weights.sum(1, keepdim=True)
+    return (weights[..., None] * conditional_xy).sum(1)
 
 
 def fit_reference_points(config, dataset, *, final_refit=False):
@@ -104,6 +124,15 @@ class ReferenceKANMixer(nn.Module):
         self.register_buffer("catalogue_indices", indices, persistent=False)
         self.register_buffer("catalogue_valid", valid, persistent=False)
         self.classes, self.settings = classes, settings
+        self.position_decoder = settings.get("position_decoder", "argmax_class")
+        if self.position_decoder not in ("argmax_class", "building_floor_mixture"):
+            raise ValueError(f"Unknown position_decoder: {self.position_decoder}")
+        if self.position_decoder == "building_floor_mixture":
+            class_buildings = settings.get("class_buildings")
+            if (not isinstance(class_buildings, list) or len(class_buildings) != classes
+                    or any(type(v) is not int or v < 0 for v in class_buildings)):
+                raise ValueError("building_floor_mixture needs class_buildings: one building id per class.")
+            self.register_buffer("class_buildings", torch.tensor(class_buildings), persistent=False)
         if settings.get('ap_grouping', 'source_order') != 'source_order':
             from ..v4_methods import validate_permutation
             validate_permutation(settings.get('ap_permutation'))
@@ -115,7 +144,7 @@ class ReferenceKANMixer(nn.Module):
             raise ValueError("Invalid RSSI augmentation or mask scale.")
         self.tokens, self.features_per_token = mixer["tokens"], mixer["features_per_token"]
         input_mode = settings.get("input_mode", "absolute_mask")
-        if input_mode not in ("absolute_mask", "absolute_relative_mask", "relative_mask", "relative_rank_mask"):
+        if input_mode not in ("absolute_mask", "absolute_relative_mask", "relative_mask", "relative_rank_mask", "rank_mask"):
             raise ValueError(f"Unknown RSSI input_mode: {input_mode}")
         channels_per_ap = 3 if input_mode in ("absolute_relative_mask", "relative_rank_mask") else 2
         if self.tokens * self.features_per_token != 520 * channels_per_ap:
@@ -142,6 +171,10 @@ class ReferenceKANMixer(nn.Module):
                 "scale_spline", "enable_standalone_scale_spline", "grid_eps", "grid_range"]}
             self.head = nn.Sequential(KANLinear(head_input, hidden, **options), nn.Dropout(mixer["dropout"]),
                                       KANLinear(hidden, len(references), **options))
+        elif head_transform == "fastkan":
+            from .fastkan import FastKANLayer
+            self.head = nn.Sequential(FastKANLayer(head_input, hidden, kan), nn.Dropout(mixer["dropout"]),
+                                      FastKANLayer(hidden, len(references), kan))
         else:
             raise ValueError(f"Unknown KAN-Mixer head_transform: {head_transform}")
         self.auxiliary_classifier = (nn.Linear(head_input, classes)
@@ -196,6 +229,7 @@ class ReferenceKANMixer(nn.Module):
             if drop:
                 mask = mask * (torch.rand_like(mask) >= drop)
             signal = signal.clamp(0, 1) * mask
+            signal, mask = self._device_augmentation(signal, mask)
         transformed = represent_signal(signal, mask, self.settings)
         if hasattr(self, 'ap_permutation'):
             transformed = transformed[:, self.ap_permutation]
@@ -208,6 +242,32 @@ class ReferenceKANMixer(nn.Module):
         else:
             representation = (self.token_pool(x).softmax(1) * x).sum(1)
         return representation
+
+    def _device_augmentation(self, signal, mask):
+        """Train-only receiver variation; off by default (V4 unchanged).
+
+        sensitivity_floor_db: with probability sensitivity_floor_probability a
+        query gets a receiver floor t ~ U(0, max) dB above -104 dBm; observed APs
+        weaker than the floor become missing (the strongest AP is always kept).
+        gain_jitter: RSSI spread around the query's observed mean is scaled by
+        s ~ U(1-g, 1+g), modelling device-specific gain slope.
+        """
+        floor_db = float(self.settings.get("sensitivity_floor_db", 0))
+        gain = float(self.settings.get("gain_jitter", 0))
+        if floor_db:
+            probability = float(self.settings.get("sensitivity_floor_probability", 0.5))
+            threshold = torch.rand((len(signal), 1), device=signal.device) * floor_db / 104
+            active = torch.rand((len(signal), 1), device=signal.device) < probability
+            strongest = signal.masked_fill(mask == 0, -1).amax(1, keepdim=True)
+            keep = (signal >= threshold) | (signal >= strongest) | ~active
+            mask = mask * keep
+            signal = signal * mask
+        if gain:
+            count = mask.sum(1, keepdim=True).clamp_min(1)
+            mean = (signal * mask).sum(1, keepdim=True) / count
+            scale = 1 + gain * (2 * torch.rand((len(signal), 1), device=signal.device) - 1)
+            signal = ((mean + scale * (signal - mean)).clamp(0, 1)) * mask
+        return signal, mask
 
     def _decode(self, reference_logits, auxiliary_logits=None, coordinate_residual=None):
         temperature = self.settings.get("temperature", 1.0)
@@ -233,6 +293,8 @@ class ReferenceKANMixer(nn.Module):
             conditional_xy = conditional_xy + coordinate_residual
         predicted_class = logits.argmax(1)
         xy = conditional_xy[torch.arange(len(reference_logits), device=reference_logits.device), predicted_class]
+        if self.position_decoder == "building_floor_mixture":
+            xy = building_floor_mixture(logits, conditional_xy, self.class_buildings)
         result = {"logits": logits, "xy": xy, "reference_logits": reference_logits,
                 "reference_xy": self.reference_xy, "reference_classes": self.reference_classes,
                 "dense_conditional_xy": dense_conditional, "conditional_xy": conditional_xy}      

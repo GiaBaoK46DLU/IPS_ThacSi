@@ -150,6 +150,9 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     if settings.get("same_point_mixing", 0) or consistency_weight or settings.get('nearby_point_mixing', 0):
         training_files.append("algorithms/kan/augmentation.py")
     kan_provenance = Path(__file__).parent / 'models/vendor/provenance.json'
+    if (config['kan'].get('backend') == 'fastkan'
+            or config.get('positioning', {}).get('head_transform') == 'fastkan'):
+        training_files.append('algorithms/kan/models/fastkan.py')
     if config['kan'].get('backend') == 'selectable':
         kan_provenance = Path(__file__).parent / 'variants/selectable/provenance.json'
         training_files += [p.relative_to(ROOT / 'src/ips').as_posix()
