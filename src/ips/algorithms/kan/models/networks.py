@@ -28,6 +28,12 @@ def mixing_branch(width: int, hidden: int, dropout: float, kan: dict, prefix: st
         from .fastkan import FastKANLayer
         return nn.Sequential(FastKANLayer(width, hidden, kan), nn.Dropout(dropout),
                              FastKANLayer(hidden, width, kan), nn.Dropout(dropout))
+    if kan.get('backend') == 'grkan':
+        from .grkan import GRKANLayer
+        # KAT-style: rational starts as identity before the first linear map and
+        # as SiLU before the second, i.e. an MLP at initialisation.
+        return nn.Sequential(GRKANLayer(width, hidden, kan, 'identity'), nn.Dropout(dropout),
+                             GRKANLayer(hidden, width, kan, 'silu'), nn.Dropout(dropout))
     if kan.get('backend', 'efficient_kan') != 'efficient_kan':
         raise ValueError('Unknown KAN backend.')
     options = {key: kan[key] for key in ["grid_size", "spline_order", "scale_noise", "scale_base",
