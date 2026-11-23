@@ -24,6 +24,10 @@ def mixing_branch(width: int, hidden: int, dropout: float, kan: dict, prefix: st
         from ..variants.selectable.layers import make_selectable_layer
         return nn.Sequential(make_selectable_layer(width, hidden, kan, prefix + '.0'), nn.Dropout(dropout),
                              make_selectable_layer(hidden, width, kan, prefix + '.2'), nn.Dropout(dropout))
+    if kan.get('backend') == 'fastkan':
+        from .fastkan import FastKANLayer
+        return nn.Sequential(FastKANLayer(width, hidden, kan), nn.Dropout(dropout),
+                             FastKANLayer(hidden, width, kan), nn.Dropout(dropout))
     if kan.get('backend', 'efficient_kan') != 'efficient_kan':
         raise ValueError('Unknown KAN backend.')
     options = {key: kan[key] for key in ["grid_size", "spline_order", "scale_noise", "scale_base",

@@ -35,8 +35,11 @@ def decode_reference(scores, model, k, temperature, auxiliary_logits=None, coord
     if coordinate_residual is not None:
         conditional = conditional + coordinate_residual
     predicted = logits.argmax(1)
-    return {"logits": logits, "conditional_xy": conditional,
-            "xy": conditional[torch.arange(len(scores), device=scores.device), predicted]}
+    xy = conditional[torch.arange(len(scores), device=scores.device), predicted]
+    if getattr(model, "position_decoder", "argmax_class") == "building_floor_mixture":
+        from .models.reference import building_floor_mixture
+        xy = building_floor_mixture(logits, conditional, model.class_buildings)
+    return {"logits": logits, "conditional_xy": conditional, "xy": xy}
 
 
 def calibrated_payload(checkpoint, candidate, calibration):
