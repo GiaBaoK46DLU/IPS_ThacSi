@@ -1,4 +1,4 @@
-"""Validation-only screening of FastKAN-Mixer candidates against V4.
+"""Validation-only screening of KAN-Mixer candidates (FastKAN, GR-KAN, ...) against V4.
 
 Each candidate = V4 config (v4_balanced_points.json) + a declared dict of
 changes. For every seed: fresh training on internal train, Validation-only
@@ -72,11 +72,12 @@ def main():
     parser.add_argument("--name", required=True)
     parser.add_argument("--changes", required=True, help="JSON dict of dotted-key changes to the V4 config")
     parser.add_argument("--seeds", default="42,43,44")
+    parser.add_argument("--output-root", type=Path, default=OUTPUT, help="folder that holds one subfolder per candidate")
     args = parser.parse_args()
     changes = json.loads(args.changes)
     seeds = [int(s) for s in args.seeds.split(",")]
     config = apply_changes(json.loads(V4_CONFIG.read_text(encoding="utf-8")), changes)
-    folder = OUTPUT / args.name
+    folder = args.output_root / args.name
     folder.mkdir(parents=True, exist_ok=True)
     registered = folder / "candidate.json"
     if registered.exists():

@@ -153,6 +153,8 @@ def train(config: dict, run_dir: Path, seed: int, device_name: str,
     if (config['kan'].get('backend') == 'fastkan'
             or config.get('positioning', {}).get('head_transform') == 'fastkan'):
         training_files.append('algorithms/kan/models/fastkan.py')
+    if config['kan'].get('backend') == 'grkan':
+        training_files.append('algorithms/kan/models/grkan.py')
     if config['kan'].get('backend') == 'selectable':
         kan_provenance = Path(__file__).parent / 'variants/selectable/provenance.json'
         training_files += [p.relative_to(ROOT / 'src/ips').as_posix()
